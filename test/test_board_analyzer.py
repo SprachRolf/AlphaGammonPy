@@ -60,7 +60,35 @@ class BoardAnalyzerTest(unittest.TestCase):
         allMoveSets = analyzer.getAllLegalMoveSets()
         self.assertEqual(len(allMoveSets), 9)
 
+        # Test red player
+        game.currentPlayer = Game.redPlayer
+        #[-2,0,0,0,0,5, 0,3,0,0,0,-5, 5,0,0,0,-3,0, -5,0,0,0,0,2, 0,0,0,0]
+        game.redDice1.faceUp = 1
+        game.redDice2.faceUp = 2
+        # game.playerA = ArtificialDumbComputerPlayer(game, Game.whitePlayer)
 
-        self.assertTrue(False) #test red player
+        analyzer = BoardAnalyzer(game);
+
+        allMoveSets = analyzer.getAllLegalMoveSets()
+        self.assertEqual(len(allMoveSets), 15)
+
+        game.board.tokens = [-2,0,0,0,0,5, 0,3,0,0,0,-5, 3,0,0,0,-3,0, -5,0,0,0,0,4, 0,0,0,-2]
+        allMoveSets = analyzer.getAllLegalMoveSets()
+        self.assertEqual(len(allMoveSets), 1)
+
+        game.board.tokens = [-2,0,0,0,0,5, 0,3,0,0,0,-5, 3,0,0,0,-3,0, -5,0,0,0,0,4, 0,0,0,-3]
+        game.redDice1.faceUp = 1
+        game.redDice2.faceUp = 1
+        allMoveSets = analyzer.getAllLegalMoveSets()
+        self.assertEqual(len(allMoveSets), 3)
+
+
+        game.board.tokens = [-2,0,0,0,0,5, 0,3,0,0,0,-5, 3,0,0,0,-3,0, -5,0,0,0,0,4, 0,0,0,-2]
+        game.redDice1.faceUp = 1
+        game.redDice2.faceUp = 1
+        allMoveSets = analyzer.getAllLegalMoveSets()
+        self.assertEqual(len(allMoveSets), 9)
+        
+
 
 

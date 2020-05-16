@@ -13,8 +13,8 @@ class BoardAnalyzer:
 
         for i in range(24):
             toPoint = board.ownPoint(i-unusedPips[0])
-            if (board.hasOwnTokensAt(i) and board.pointIsOpen(toPoint)):
-                step = (i,toPoint)
+            if (board.hasOwnTokensAt( board.ownPoint(i) ) and board.pointIsOpen(toPoint)):
+                step = ( board.ownPoint(i),toPoint)
                 stepBoard = board.copy()
                 stepBoard.moveToken(step)
                 stepUnusedPips = unusedPips.copy()
@@ -79,10 +79,11 @@ class BoardAnalyzer:
                     else:
                         foundSecondStep = False
                         for k in range(24):
-                            toPoint = k-face2
-                            if (stepBoard.hasOwnTokensAt(k) and stepBoard.pointIsOpen(toPoint)):
+                            fromPoint = stepBoard.ownPoint(k)
+                            toPoint = stepBoard.ownPoint(k-face2)
+                            if (stepBoard.hasOwnTokensAt(fromPoint) and stepBoard.pointIsOpen(toPoint)):
                                 foundSecondStep = True
-                                step = (k,toPoint)
+                                step = (fromPoint,toPoint)
                                 stepSteps = steps.copy()
                                 stepSteps.append(step)
                                 moveSet.append(tuple(stepSteps))
@@ -95,18 +96,20 @@ class BoardAnalyzer:
                 else:
                     # Move any combination of tokens that are not on the bar
                     for i in range(24):
-                        toPoint = i-face1
-                        if (board.hasOwnTokensAt(i) and board.pointIsOpen(toPoint)):
+                        fromPoint = board.ownPoint(i)
+                        toPoint = board.ownPoint(i-face1)
+                        if (board.hasOwnTokensAt(fromPoint) and board.pointIsOpen(toPoint)):
                             stepBoard = board.copy()
-                            step = (i,toPoint)
+                            step = (fromPoint,toPoint)
                             steps = [step]
                             stepBoard.moveToken(step)
                             foundSecondStep = False
                             for k in range(24):
-                                toPoint = k-face2
-                                if (stepBoard.hasOwnTokensAt(k) and stepBoard.pointIsOpen(toPoint)):
+                                fromPoint = stepBoard.ownPoint(k)
+                                toPoint = stepBoard.ownPoint(k-face2)
+                                if (stepBoard.hasOwnTokensAt(fromPoint) and stepBoard.pointIsOpen(toPoint)):
                                     foundSecondStep = True
-                                    step = (k,toPoint)
+                                    step = (fromPoint,toPoint)
                                     stepSteps = steps.copy()
                                     stepSteps.append(step)
                                     moveSet.append(tuple(stepSteps))
@@ -129,7 +132,7 @@ class BoardAnalyzer:
             # Move up to 4 tokens off the bar
             toPoint = stepBoard.ownPoint(24 - unusedPips[0])
             while (stepBoard.hasOwnTokensAt(stepBoard.ownBarPoint()) and (len(unusedPips) > 0) and stepBoard.pointIsOpen(toPoint)):
-                step = (stepBoard.ownBarPoint(), stepBoard.ownPoint(24 - unusedPips[0]))
+                step = (stepBoard.ownBarPoint(), toPoint)
                 del unusedPips[0]
                 steps.append(step)
                 stepBoard.moveToken(step)
