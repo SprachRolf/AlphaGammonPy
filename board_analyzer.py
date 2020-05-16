@@ -7,16 +7,13 @@ class BoardAnalyzer:
         self.game = game
 
     def getMoveEndings(self, board, unusedPips):
-        print("1")
         moves = []
         if len(unusedPips) == 0:
-            print("2")
             return moves
 
         for i in range(24):
             toPoint = board.ownPoint(i-unusedPips[0])
             if (board.hasOwnTokensAt(i) and board.pointIsOpen(toPoint)):
-                print("3")
                 step = (i,toPoint)
                 stepBoard = board.copy()
                 stepBoard.moveToken(step)
@@ -24,13 +21,10 @@ class BoardAnalyzer:
                 del stepUnusedPips[0]
                 endings = self.getMoveEndings(stepBoard, stepUnusedPips)
                 if (len(endings) == 0):
-                    print("4")
                     moves.append([step])
                 for end in endings:
-                    print("5")
                     end.insert(0,step)
                     moves.append(end)
-        print("6")
         return moves
 
             
@@ -140,7 +134,7 @@ class BoardAnalyzer:
                 steps.append(step)
                 stepBoard.moveToken(step)
 
-            print("steps from the bar: " +str(steps))
+            #print("steps from the bar: " +str(steps))
 
             # The tokens on the bar couldn't move 
             # or there are no tokens on the bar any more
@@ -153,14 +147,14 @@ class BoardAnalyzer:
             # Recursively I would do one partial move and order 
             # "give me all possible combinations to use up the remaining 3 pips",
             # which returns me a list of move-endings.
-            print("unused Pips: "+ str(unusedPips))
+            #print("unused Pips: "+ str(unusedPips))
             endings = self.getMoveEndings(stepBoard, unusedPips)
-            print("endings: "+ str(endings))
+            #print("endings: "+ str(endings))
 
             # Glue the steps I used to get off the board to each move ending and I have all possible moves.
             for end in endings:
-                print("type steps: "+ str(type(steps)) +", type end: " +str(type(end)))
-                print("steps ("+ str(steps) +") with ending (" +str(end) +": " +str(steps + end))
+                #print("type steps: "+ str(type(steps)) +", type end: " +str(type(end)))
+                #print("steps ("+ str(steps) +") with ending (" +str(end) +": " +str(steps + end))
                 moveSet.append(steps + end)
 
         # Remove illegal moves (moves where pip values are wasted)
