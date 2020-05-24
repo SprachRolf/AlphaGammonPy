@@ -1,5 +1,7 @@
-from game import Game
+#from game import Game
+
 from board import Board
+
 
 class BoardAnalyzer:
 
@@ -12,9 +14,13 @@ class BoardAnalyzer:
             return moves
 
         for i in range(24):
-            toPoint = board.ownPoint(i-unusedPips[0])
-            if (board.hasOwnTokensAt( board.ownPoint(i) ) and board.pointIsOpen(toPoint)):
-                step = ( board.ownPoint(i),toPoint)
+            fromPoint = board.ownPoint(i)
+            whiteToPoint = i-unusedPips[0]
+            if whiteToPoint < 0:
+                whiteToPoint = Board.whiteOffPoint
+            toPoint = board.ownPoint(whiteToPoint)
+            if (board.hasOwnTokensAt(fromPoint) and board.pointIsOpen(toPoint)):
+                step = (fromPoint,toPoint)
                 stepBoard = board.copy()
                 stepBoard.moveToken(step)
                 stepUnusedPips = unusedPips.copy()
@@ -64,9 +70,9 @@ class BoardAnalyzer:
                 steps = []
                 # Move one token (if possible from the bar)
                 if board.hasOwnTokensAt(board.ownBarPoint()):
-                    if board.pointIsOpen(board.ownPoint(24-face1)):
-                        stepBoard = board.copy()
-                        step = (board.ownBarPoint(), board.ownPoint(24-face1))
+                    stepBoard = board.copy()
+                    if stepBoard.pointIsOpen(stepBoard.ownPoint(24-face1)):
+                        step = (stepBoard.ownBarPoint(), stepBoard.ownPoint(24-face1))
                         steps.append(step)
                         stepBoard.moveToken(step)
                     # else:
@@ -80,7 +86,10 @@ class BoardAnalyzer:
                         foundSecondStep = False
                         for k in range(24):
                             fromPoint = stepBoard.ownPoint(k)
-                            toPoint = stepBoard.ownPoint(k-face2)
+                            whiteToPoint = k-face2
+                            if whiteToPoint < 0:
+                                whiteToPoint = Board.whiteOffPoint
+                            toPoint = stepBoard.ownPoint(whiteToPoint)
                             if (stepBoard.hasOwnTokensAt(fromPoint) and stepBoard.pointIsOpen(toPoint)):
                                 foundSecondStep = True
                                 step = (fromPoint,toPoint)
@@ -97,7 +106,10 @@ class BoardAnalyzer:
                     # Move any combination of tokens that are not on the bar
                     for i in range(24):
                         fromPoint = board.ownPoint(i)
-                        toPoint = board.ownPoint(i-face1)
+                        whiteToPoint = i-face1
+                        if whiteToPoint < 0:
+                            whiteToPoint = Board.whiteOffPoint
+                        toPoint = board.ownPoint(whiteToPoint)
                         if (board.hasOwnTokensAt(fromPoint) and board.pointIsOpen(toPoint)):
                             stepBoard = board.copy()
                             step = (fromPoint,toPoint)
@@ -106,7 +118,10 @@ class BoardAnalyzer:
                             foundSecondStep = False
                             for k in range(24):
                                 fromPoint = stepBoard.ownPoint(k)
-                                toPoint = stepBoard.ownPoint(k-face2)
+                                whiteToPoint = k-face2
+                                if whiteToPoint < 0:
+                                    whiteToPoint = Board.whiteOffPoint
+                                toPoint = board.ownPoint(whiteToPoint)
                                 if (stepBoard.hasOwnTokensAt(fromPoint) and stepBoard.pointIsOpen(toPoint)):
                                     foundSecondStep = True
                                     step = (fromPoint,toPoint)
@@ -114,7 +129,7 @@ class BoardAnalyzer:
                                     stepSteps.append(step)
                                     moveSet.append(tuple(stepSteps))
                             if not foundSecondStep:
-                                moveSet.append(steps)
+                                moveSet.append(tuple(steps))
                 # Now moveSet contains all possible combinations of two tokens moving first pip 1 and then pip 2
 
                 # Repeat, now moving step2 first, then step1
@@ -130,14 +145,13 @@ class BoardAnalyzer:
             steps = []
             stepBoard = board.copy()
             # Move up to 4 tokens off the bar
+            fromPoint = stepBoard.ownBarPoint()
             toPoint = stepBoard.ownPoint(24 - unusedPips[0])
             while (stepBoard.hasOwnTokensAt(stepBoard.ownBarPoint()) and (len(unusedPips) > 0) and stepBoard.pointIsOpen(toPoint)):
-                step = (stepBoard.ownBarPoint(), toPoint)
+                step = (fromPoint, toPoint)
                 del unusedPips[0]
                 steps.append(step)
                 stepBoard.moveToken(step)
-
-            #print("steps from the bar: " +str(steps))
 
             # The tokens on the bar couldn't move 
             # or there are no tokens on the bar any more
@@ -150,24 +164,21 @@ class BoardAnalyzer:
             # Recursively I would do one partial move and order 
             # "give me all possible combinations to use up the remaining 3 pips",
             # which returns me a list of move-endings.
-            #print("unused Pips: "+ str(unusedPips))
             endings = self.getMoveEndings(stepBoard, unusedPips)
-            #print("endings: "+ str(endings))
 
-            # Glue the steps I used to get off the board to each move ending and I have all possible moves.
-            for end in endings:
-                #print("type steps: "+ str(type(steps)) +", type end: " +str(type(end)))
-                #print("steps ("+ str(steps) +") with ending (" +str(end) +": " +str(steps + end))
-                moveSet.append(steps + end)
+            if len(endings) > 0:
+                # Glue the steps I used to get off the board to each move ending and I have all possible moves.
+                for end in endings:
+                    moveSet.append(tuple(steps + end))
+            else:
+                moveSet.append(tuple(steps))
 
         # Remove illegal moves (moves where pip values are wasted)
         # Remove equivalent moves (where the resulting boards are identical)
         boards = set()
         finalMoveSet = []
         
-        #print("all moves: ")
         for move in moveSet:
-            #print(str(move))
             if board.moveSetIsLegal(move):
                 stepBoard = board.copy()
                 stepBoard.moveTokens(move)
@@ -175,9 +186,6 @@ class BoardAnalyzer:
                 if not tupleBoard in boards:
                     boards.add(tupleBoard)
                     finalMoveSet.append(move)
-                    #print("is in")
-
-        #print("length: "+ str(len(finalMoveSet)))
 
         return tuple(finalMoveSet)
 
@@ -189,4 +197,11 @@ class BoardAnalyzer:
         if len(sets) > 0:
             return sets[0]
         return  ()
+
+    def getHighestLegalMoveSet(self):
+        sets = self.getAllLegalMoveSets()
+        if len(sets) > 0:
+            return sets[len(sets)-1]
+        return  ()
+
 

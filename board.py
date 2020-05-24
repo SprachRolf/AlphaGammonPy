@@ -10,9 +10,9 @@ class Board:
     redOffPoint: Final   = 25
     whiteOffPoint: Final = -2 # equivalent to 26
     redBarPoint: Final   = -1 # equivalent to 27
+    initialTokenSetup: Final = [-2,0,0,0,0,5, 0,3,0,0,0,-5, 5,0,0,0,-3,0, -5,0,0,0,0,2, 0,0,0,0]
 
-
-    def __init__(self, game, tokens=[-2,0,0,0,0,5, 0,3,0,0,0,-5, 5,0,0,0,-3,0, -5,0,0,0,0,2, 0,0,0,0]):
+    def __init__(self, game, tokens=initialTokenSetup):
         # white tokes are positive, red ones negative
         self.game = game
 
@@ -33,17 +33,17 @@ class Board:
     # Translates point numbers for the white player 
     # into point numbers for the red player.
     def ownPoint(self, point):
-        if (self.game.currentPlayer == game.Game.whitePlayer):
+        if (self.game.currentPlayer == game.Game.white):
             return point
         return 23 - point 
 
     def ownBarPoint(self):
-        if self.game.currentPlayer == game.Game.whitePlayer:
+        if self.game.currentPlayer == game.Game.white:
             return Board.whiteBarPoint
         return Board.redBarPoint
 
     def opponentBarPoint(self):
-        if self.game.currentPlayer == game.Game.whitePlayer:
+        if self.game.currentPlayer == game.Game.white:
             return Board.redBarPoint 
         return Board.whiteBarPoint
 
@@ -58,7 +58,7 @@ class Board:
                 self.tokens[point]*self.game.currentPlayer > -2)
 
     def hasOwnTokensInHome(self):
-        if (self.game.currentPlayer == game.Game.whitePlayer):
+        if (self.game.currentPlayer == game.Game.white):
             for i in range(0,6):
                 if self.hasOwnTokensAt(i):
                     return True
@@ -73,7 +73,7 @@ class Board:
     def mayBearOff(self):
         if (self.hasOwnTokensAt(self.ownBarPoint())):
             return False
-        if self.game.currentPlayer == game.Game.whitePlayer:
+        if self.game.currentPlayer == game.Game.white:
             for i in range(6,24):
                 if (self.hasOwnTokensAt(i)):
                     return False
@@ -87,6 +87,9 @@ class Board:
 
         # There is no own token left on the whole board at all.
         return False
+
+    def hasWon(self):
+        return (self.tokens[self.ownPoint(Board.whiteOffPoint)] == 15)
 
     def moveTokens(self, moves):
         "moves is a tuple of pairs describing the move of one token"
@@ -137,13 +140,16 @@ class Board:
         diceFaces = self.game.getDiceFaces()
         unusedPips = self.game.getPips(diceFaces)
         board = self.copy()
+        if (len(moves) == 0 and board.hasLegalMoves(unusedPips)):
+            return False;
+
         for move in moves:
             fromPoint, toPoint = move
 
             # Check if the move wants to move the tokens _on_ the board
             # Only when bearing off, tokens can be moved to the off-points
-            if (self.mayBearOff()):
-                if (self.game.currentPlayer == game.Game.whitePlayer):
+            if (board.mayBearOff()):
+                if (board.game.currentPlayer == game.Game.white):
                     # may bear off, this means all tokens are in the home are, Point 0 to Point 5
                     if (toPoint < Board.whiteOffPoint or toPoint > 4):
                         return False
@@ -165,7 +171,7 @@ class Board:
                 return False
 
             # Player has to move all own tokens from the bar before doing any other move
-            if (board.hasOwnTokensAt(self.ownBarPoint()) and (fromPoint != self.ownBarPoint()) ):
+            if (board.hasOwnTokensAt(board.ownBarPoint()) and (fromPoint != board.ownBarPoint()) ):
                 return False
 
             if not board.hasOwnTokensAt(fromPoint):
@@ -176,7 +182,7 @@ class Board:
                 return False
 
             if (toPoint == Board.whiteOffPoint):
-                if (self.game.currentPlayer == game.Game.redPlayer):
+                if (board.game.currentPlayer == game.Game.red):
                     return False  # the red player may not move to white Off point
                 #bearing off
                 distance = fromPoint +1 # just move the token off the board
@@ -203,7 +209,7 @@ class Board:
                         return False
 
             elif (toPoint == Board.redOffPoint):
-                if (self.game.currentPlayer == game.Game.whitePlayer):
+                if (board.game.currentPlayer == game.Game.white):
                     return False  # the white player may not move to red Off point
                 #bearing off
                 distance = 24-fromPoint # just move the token off the board
@@ -223,7 +229,7 @@ class Board:
                     for pip in unusedPips:
                         if pip > distance:
                             foundPip = pip
-                    if foundPip:
+                    if foundPip > 0:
                         unusedPips.remove(foundPip)
                         board.moveToken(move)
                     else:
@@ -233,7 +239,7 @@ class Board:
                 # It is a normal move, not a bearing-off move.
                 try:
                     distance = fromPoint - toPoint
-                    unusedPips.remove(distance*self.game.currentPlayer)
+                    unusedPips.remove(distance*board.game.currentPlayer)
                     # move one token
                     # The following moves depend on the first moves.
                     # They may become legal or impossible.
@@ -256,27 +262,57 @@ class Board:
             # The unused Pip could become usable by using it first or by moving another token.
 
 
-            #minPip will contain the smaller pip if only one can be used but not the other
+            #minPip will contain the smaller unused pip if only one can be used but not the other
+            board = self.copy()
             minPip = 10 # bigger than 6, the maximum dice value
 
             # Move each token pip1 and see if any other token can move.
             # Then move each token pip2 and see if any other token can move.
-            distance1 = diceFaces[0]*self.game.currentPlayer
-            distance2 = diceFaces[1]*self.game.currentPlayer
+            #distance1 = diceFaces[0]*self.game.currentPlayer
+            #distance2 = diceFaces[1]*self.game.currentPlayer
+            distance1 = diceFaces[0]
+            distance2 = diceFaces[1]
             for twice in range(2):
-                for point in range(0,24):
-                    if (self.hasOwnTokensAt(point) and self.pointIsOpen(point - distance1) ):
+                if (board.hasOwnTokensAt(board.ownBarPoint())):
+                    fromPoint = board.ownBarPoint()
+                    toPoint = board.ownPoint(Board.whiteBarPoint - distance1)
+                    if (board.pointIsOpen(toPoint)):
                         if distance2 < minPip:
                             minPip = distance2
-
-                        stepBoard = self.copy() # a board to test a single move
-                        # We cannot use stepBoard.moveTokens() since moving a single move is not legal
-                        stepBoard.moveToken( (point, point - distance1))
+                        stepBoard = board.copy()
+                        stepBoard.moveToken( (fromPoint,toPoint) )
                         if stepBoard.hasLegalMoves([distance2]):
                             # found a way to use both dice values
                             return False
-                distance2 = diceFaces[0]*self.game.currentPlayer
-                distance1 = diceFaces[1]*self.game.currentPlayer
+                else:
+                    if board.hasWon():
+                        # A pip was left over because no tokens are left on the board any more.
+                        # In this case using the lower pip is also legal 
+                        # (with the higher pip the player can also just move the token off the board).
+                        return True
+
+                    for point in range(0,24):
+                        fromPoint = board.ownPoint(point)
+                        whiteToPoint = point - distance1
+                        if whiteToPoint < 0:
+                            whiteToPoint = Board.whiteOffPoint
+                        toPoint = board.ownPoint(whiteToPoint)
+                        if (board.hasOwnTokensAt(fromPoint) and board.pointIsOpen(toPoint) ):
+                            if distance2 < minPip:
+                                minPip = distance2
+
+                            stepBoard = board.copy() # a board to test a single move
+                            # We cannot use stepBoard.moveTokens() since moving a single move is not legal
+                            stepBoard.moveToken( (fromPoint, toPoint))
+                            if (stepBoard.hasWon()):
+                                return True
+                            if stepBoard.hasLegalMoves([distance2]):
+                                # found a way to use both dice values
+                                return False
+                #distance2 = diceFaces[0]*self.game.currentPlayer
+                #distance1 = diceFaces[1]*self.game.currentPlayer
+                distance2 = diceFaces[0]
+                distance1 = diceFaces[1]
 
             # I moved every possible token for dice value 1 and checked if any token can move after that.
             # Then I moved every possible token for dice value 2 and checked if any token can move after that.
@@ -286,6 +322,11 @@ class Board:
             # unusedPips must contain both dice values (or 4 if both dice show the same vaule)
             # and "moves" must be an empty list then to be legal, 
             if minPip == 10:
+                if (len(unusedPips) != 2):
+                    print("Playercolor: ", board.game.currentPlayer,", minPip: ",minPip,sep="")
+                    print("dice 1: ", diceFaces[0],", dice 2: ",diceFaces[1],", unusedPips: ",unusedPips,sep="")
+                    print("original Board:", board.tokens)
+                    print("moves:", moves)
                 assert(len(unusedPips) == 2)
                 assert(len(moves) == 0) # if moves would contain any moves, they must be impossible and be caught earliser.
             if (minPip < unusedPips[0]):
@@ -297,6 +338,30 @@ class Board:
             for pip in unusedPips:
                 if self.pointIsOpen(self.ownBarPoint() -pip*self.game.currentPlayer):
                     return True
+        elif self.mayBearOff():
+            for pip in unusedPips:
+                if self.hasOwnTokensAt(self.ownPoint(pip -1)):
+                    # There is a token that can move off by moving exactly <pip> points.
+                    return True
+                foundTokenOnHigherPosition = False
+                for homePos in range(pip, 6):
+                    fromPoint = self.ownPoint(homePos)
+                    toPoint = self.ownPoint(homePos - pip)
+                    if self.hasOwnTokensAt(fromPoint):
+                        foundTokenOnHigherPosition = True
+                        if self.pointIsOpen(toPoint):
+                            # A token on a higher position can move within the home Points
+                            return False
+                if not foundTokenOnHigherPosition:
+                    # If there is any token on a lower position, it may be borne off (wasting some pip value)
+                    for homePos in range(0,pip-1):
+                        if self.hasOwnTokensAt(self.ownPoint(homePos)):
+                            return True
+                # There was no token on the "pip-position" (where it could be borne of without wasting pip values),
+                # none was on a higher position and none was on a lowewr position.
+                # There are unused pips and no move is possible. 
+                # Either the player has won or there are blocked tokens on higher positions than pip-position.
+                return False
         else:                    
             for point in range(0,24):
                 if self.hasOwnTokensAt(point):

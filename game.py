@@ -1,7 +1,8 @@
 import random
 from typing import Final
-#from players import Player, ArtificialDumbComputerPlayer
+from players import Player
 import board
+from board_analyzer import BoardAnalyzer
 
 #import tkinter
 
@@ -23,20 +24,80 @@ class DoublingDice:
             self.faceUp = 1
 
 class Game:
-    whitePlayer: Final = 1
-    redPlayer: Final = -1
+    white: Final = 1
+    red: Final = -1
 
     def __init__(self):
         self.board = board.Board(self)
-        self.currentPlayer = Game.whitePlayer
+        self.currentPlayer = Game.white
         self.redDice1 = Dice()
         self.redDice2 = Dice()
         self.whiteDice1 = Dice()
         self.whiteDice2 = Dice()
         self.doublingDice = DoublingDice()
 
+        # A player gave up after being offered doubling the stakes (with the doubling dice)
+        self.redGaveUp = False
+        self.whiteGaveUp = False
+
+    def setWhitePlayer(self, player):
+        player.game = self
+        player.analyzer = BoardAnalyzer(self)
+        self.playerA = player
+
+    def setRedPlayer(self, player):
+        player.game = self
+        player.analyzer = BoardAnalyzer(self)
+        self.playerB = player
+
+
+    def setup(self):
+        self.board.tokens = board.Board.initialTokenSetup.copy()
+
+    def whiteWon(self):
+        return (self.board.tokens[board.Board.whiteOffPoint] == 15) or self.redGaveUp
+
+    def redWon(self):
+        return (self.board.tokens[board.Board.redOffPoint] == -15) or self.whiteGaveUp
+
+    # Is true if one of the players has all tokens off the board
+    # or if a player declined doubling the stakes
+    def winnerDetermined(self):
+        return self.whiteWon() or self.redWon()
+
+    def runMatch(self):
+        try:
+            if (not isinstance(self.playerA, Player) or not isinstance(self.playerB, Player)):
+                return 0
+        except Exception:
+            print(Exception.__class__)
+            return 0
+
+        # Let both players roll a dice
+        # Let the player begin, who rolled the higher face
+
+        # For now white starts
+        while not self.winnerDetermined():
+            #self.currentPlayer = Game.white
+            #self.playerA.yourTurn()
+            self.currentPlayer = Game.red
+            self.playerB.yourTurn()
+            if not self.winnerDetermined():
+                #self.currentPlayer = Game.red
+                #self.playerB.yourTurn()
+                self.currentPlayer = Game.white
+                self.playerA.yourTurn()
+        
+        assert (not (self.whiteWon() and self.redWon()))
+        if self.whiteWon():
+            return self.white
+        else:
+            assert self.redWon()
+            return self.red
+        
+
     def rollOwnDice(self):
-        if self.currentPlayer == Game.whitePlayer:
+        if self.currentPlayer == Game.white:
             self.whiteDice1.roll()
             self.whiteDice2.roll()
         else:
@@ -44,7 +105,7 @@ class Game:
             self.redDice2.roll()
 
     def getDiceFaces(self):
-        if self.currentPlayer == Game.whitePlayer:
+        if self.currentPlayer == Game.white:
             dice1 = self.whiteDice1
             dice2 = self.whiteDice2
         else:
@@ -62,5 +123,3 @@ class Game:
         else:
             return [faces[0], faces[1]]
 
-    #def getPips(self, faces):
-        #return self.getPips(self.getDiceFaces())

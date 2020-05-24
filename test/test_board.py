@@ -26,7 +26,7 @@ class BoardTest (unittest.TestCase):
         self.assertTrue (self.game.board.hasOwnTokensAt(5))
 
         # test as red
-        self.game.currentPlayer = Game.redPlayer
+        self.game.currentPlayer = Game.red
         self.assertTrue (self.game.board.hasOwnTokensAt(0))
         self.assertFalse(self.game.board.hasOwnTokensAt(1))
         self.assertFalse(self.game.board.hasOwnTokensAt(5))
@@ -40,7 +40,7 @@ class BoardTest (unittest.TestCase):
         self.assertFalse(self.game.board.isInitial())
         
         self.game = Game()
-        self.game.currentPlayer = Game.redPlayer
+        self.game.currentPlayer = Game.red
         self.game.redDice1 = 4
         self.assertTrue(self.game.board.isInitial())
         self.game.board.moveToken( (0,4) )
@@ -58,7 +58,7 @@ class BoardTest (unittest.TestCase):
         self.assertEqual(board.ownPoint(5), 5)
         self.assertEqual(board.ownPoint(16), 16)
 
-        self.game.currentPlayer = Game.redPlayer
+        self.game.currentPlayer = Game.red
         self.assertEqual(board.ownPoint(23), 0)
         self.assertEqual(board.ownPoint(0), 23)
 
@@ -89,7 +89,7 @@ class BoardTest (unittest.TestCase):
         self.assertTrue(self.game.board.moveSetIsLegal( ((5,4),(4,2)) ))
         self.assertTrue(self.game.board.moveSetIsLegal( ((23,22),(5,3)) ))
 
-        self.game.currentPlayer = Game.redPlayer
+        self.game.currentPlayer = Game.red
         self.game.redDice1.faceUp = 1
         self.game.redDice2.faceUp = 2
         self.assertTrue(self.game.board.moveSetIsLegal( ((0,2),(16,17)) ))
@@ -102,7 +102,7 @@ class BoardTest (unittest.TestCase):
         self.assertTrue (self.game.board.moveSetIsLegal( ((23,22),(23,21)) ))
         self.assertFalse(self.game.board.moveSetIsLegal( ((23,21),(22,21)) ))
 
-        self.game.currentPlayer = Game.redPlayer
+        self.game.currentPlayer = Game.red
         self.game.redDice1.faceUp = 1
         self.game.redDice2.faceUp = 2
         self.assertFalse(self.game.board.moveSetIsLegal( ((4,3), (5,4)) ))
@@ -128,7 +128,7 @@ class BoardTest (unittest.TestCase):
         self.assertTrue(self.game.board.moveSetIsLegal( ((5,3),(5,3),(5,3),(5,3)) ))
         self.assertFalse(self.game.board.moveSetIsLegal( ((5,3),(5,3),(5,3),(5,3),(5,3)) ))
 
-        self.game.currentPlayer = Game.redPlayer
+        self.game.currentPlayer = Game.red
         self.game.redDice1.faceUp = 1
         self.game.redDice2.faceUp = 2
         self.assertFalse(self.game.board.moveSetIsLegal( ((0,3),(4,5)) ))
@@ -152,7 +152,7 @@ class BoardTest (unittest.TestCase):
         self.assertFalse(self.game.board.moveSetIsLegal( ((5,4),(4,6)) ))
         self.assertTrue(self.game.board.moveSetIsLegal( ((5,4),(5,3)) ))
 
-        self.game.currentPlayer = Game.redPlayer
+        self.game.currentPlayer = Game.red
         self.game.redDice1.faceUp = 1
         self.game.redDice2.faceUp = 2
         self.assertFalse(self.game.board.moveSetIsLegal( ((11,10),(11,9)) ))
@@ -193,7 +193,7 @@ class BoardTest (unittest.TestCase):
         self.assertFalse(self.game.board.moveSetIsLegal( ((8,7), (5,Board.redBarPoint)) ))
 
         self.game = Game()
-        self.game.currentPlayer = Game.redPlayer
+        self.game.currentPlayer = Game.red
         self.game.redDice1.faceUp = 4
         self.game.redDice2.faceUp = 6
         #[-2,0,0,0,0,5, 0,3,0,0,0,-5, 5,0,0,0,-3,0, -5,0,0,0,0,2,  0,0,0,0]):
@@ -231,7 +231,7 @@ class BoardTest (unittest.TestCase):
         self.assertFalse(self.game.board.moveSetIsLegal( ((5,3),) ))
         self.assertFalse(self.game.board.moveSetIsLegal( ((5,3),(5,3)) ))
 
-        self.game.currentPlayer = Game.redPlayer
+        self.game.currentPlayer = Game.red
         self.game.redDice1.faceUp = 3
         self.game.redDice2.faceUp = 3
         self.assertFalse(self.game.board.moveSetIsLegal( ((11,14),(11,14),) ))
@@ -292,7 +292,7 @@ class BoardTest (unittest.TestCase):
         self.assertTrue (self.game.board.moveSetIsLegal( ((6,4),(4,3)) ))
         self.assertFalse(self.game.board.moveSetIsLegal( ((8,6),) ))
 
-        self.game.currentPlayer = Game.redPlayer
+        self.game.currentPlayer = Game.red
         self.game.redDice1.faceUp = 1
         self.game.redDice2.faceUp = 2
         self.assertTrue (self.game.board.moveSetIsLegal( ((5,7),(7,8)) ))
@@ -323,7 +323,7 @@ class BoardTest (unittest.TestCase):
         self.assertFalse(self.game.board.moveSetIsLegal( ((6,5),(6,4)) ))
         self.assertTrue(self.game.board.moveSetIsLegal( () ))
 
-        self.game.currentPlayer = Game.redPlayer
+        self.game.currentPlayer = Game.red
         self.game.board.tokens = [0,0,0,0,0,-15, 13,2,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0,  0,0,0,0]
         self.game.redDice1.faceUp = 1
         self.game.redDice2.faceUp = 2
@@ -341,7 +341,7 @@ class BoardTest (unittest.TestCase):
         self.game.board.moveTokens( ((6,4),(4,3)) )
         self.assertFalse(self.game.board.hasOwnTokensAt(4))
         self.assertTrue(self.game.board.hasOwnTokensAt(3))
-        self.game.currentPlayer = Game.redPlayer
+        self.game.currentPlayer = Game.red
         self.assertFalse(self.game.board.hasOwnTokensAt(3))
         self.assertFalse(self.game.board.hasOwnTokensAt(4))
         self.assertEqual(self.game.board.tokens[Board.redBarPoint], -2) # two red tokens are on the bar
@@ -385,7 +385,7 @@ class BoardTest (unittest.TestCase):
         self.assertEqual(self.game.board.tokens[Board.redBarPoint], -4)
 
         self.game = Game()
-        self.game.currentPlayer = Game.redPlayer
+        self.game.currentPlayer = Game.red
         self.game.board.tokens = [-1,0,0,0,-1,-13, 1,13,0,1,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0,  0,0,0,0]
         self.game.redDice1.faceUp = 3
         self.game.redDice2.faceUp = 6
@@ -394,14 +394,14 @@ class BoardTest (unittest.TestCase):
         self.game.board.moveTokens( ((0,6),(6,9)) )
         self.assertFalse(self.game.board.hasOwnTokensAt(0))
         self.assertTrue(self.game.board.hasOwnTokensAt(9))
-        self.game.currentPlayer = Game.whitePlayer
+        self.game.currentPlayer = Game.white
         self.assertFalse(self.game.board.hasOwnTokensAt(6))
         self.assertFalse(self.game.board.hasOwnTokensAt(9))
         self.assertTrue(self.game.board.tokens == [0,0,0,0,-1,-13, 0,13,0,-1,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0,  2,0,0,0])
         self.assertEqual(self.game.board.tokens[Board.whiteBarPoint], 2) # two white tokens are on the bar
 
 
-        self.game.currentPlayer = Game.whitePlayer
+        self.game.currentPlayer = Game.white
         self.game.board.tokens = [-1,0,0,0,0,-10, 1,10,0,1,0,0, 0,0,0,0,0,0, 0,0,0,0,-1,0,  3,0,0,-3]
         self.game.whiteDice1.faceUp = 1
         self.game.whiteDice2.faceUp = 2
@@ -478,7 +478,7 @@ class BoardTest (unittest.TestCase):
 
 
         self.game = Game()
-        self.game.currentPlayer = Game.redPlayer
+        self.game.currentPlayer = Game.red
         self.game.board.tokens = [0,1,0,-1,-1,-11, 14,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0,  0,0,0,-2]
         assert(self.game.board.tokens[Board.redBarPoint] == -2) # not a test assert. a program logic assert
         self.game.redDice1.faceUp = 1
@@ -523,7 +523,7 @@ class BoardTest (unittest.TestCase):
         self.assertTrue(self.game.board.moveSetIsLegal( () ))
         self.assertFalse(self.game.board.moveSetIsLegal( ((7,6),(7,6),(7,6),(7,6)) ))
 
-        self.game.currentPlayer = Game.redPlayer
+        self.game.currentPlayer = Game.red
         self.game.redDice1.faceUp = 1
         self.game.redDice2.faceUp = 1
         self.assertTrue(self.game.board.moveSetIsLegal( () ))
@@ -539,32 +539,32 @@ class BoardTest (unittest.TestCase):
 
         self.game.redDice1.faceUp = 1
         self.game.redDice2.faceUp = 1
-        self.game.currentPlayer = Game.redPlayer
+        self.game.currentPlayer = Game.red
         self.assertTrue(self.game.board.mayBearOff())
 
         self.game.board.tokens = [1,1,1,1,1,10, 0,0,0,0,0,0, 0,0,0,0,0,0, -2,-2,-2,-2,-2,-2,  0,-3,1,0]
-        self.game.currentPlayer = Game.whitePlayer
+        self.game.currentPlayer = Game.white
         self.assertTrue(self.game.board.mayBearOff())
-        self.game.currentPlayer = Game.redPlayer
+        self.game.currentPlayer = Game.red
         self.assertTrue(self.game.board.mayBearOff())
 
         self.game.board.tokens = [1,1,1,1,1,9, 1,0,0,0,0,0, 0,0,0,0,0,-1, -2,-2,-2,-2,-2,-2,  0,-2,1,0]
-        self.game.currentPlayer = Game.whitePlayer
+        self.game.currentPlayer = Game.white
         self.assertFalse(self.game.board.mayBearOff())
-        self.game.currentPlayer = Game.redPlayer
+        self.game.currentPlayer = Game.red
         self.assertFalse(self.game.board.mayBearOff())
 
 
         self.game.board.tokens = [0,4,0,0,0,10, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0,  1,0,0,-15]
-        self.game.currentPlayer = Game.whitePlayer
+        self.game.currentPlayer = Game.white
         self.assertFalse(self.game.board.mayBearOff())
-        self.game.currentPlayer = Game.redPlayer
+        self.game.currentPlayer = Game.red
         self.assertFalse(self.game.board.mayBearOff())
 
         self.game.board.tokens = [0,4,0,0,-1,10, 1,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,-14,  0,0,0,0]
-        self.game.currentPlayer = Game.whitePlayer
+        self.game.currentPlayer = Game.white
         self.assertFalse(self.game.board.mayBearOff())
-        self.game.currentPlayer = Game.redPlayer
+        self.game.currentPlayer = Game.red
         self.assertFalse(self.game.board.mayBearOff())
 
 
@@ -624,7 +624,7 @@ class BoardTest (unittest.TestCase):
 
         ## testing bearing of for the red player
 
-        self.game.currentPlayer = Game.redPlayer
+        self.game.currentPlayer = Game.red
 
         # Bearing off two red tokens
         self.game.board.tokens = [0,5,0,0,0,10, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,-5,-10,  0,0,0,0]
@@ -721,102 +721,6 @@ class BoardTest (unittest.TestCase):
         self.assertFalse(self.game.board.moveSetIsLegal( ((5,4),(5,3),(5,3),(5,3),(5,3),(5,3),(5,3),(5,3),(5,3),(5,3),(5,3) ) ))
 
 
-class PythonLanguageTest(unittest.TestCase):
-    def testListEquals(self):
-        liste = [1,2,3]
-        list2 = [1,2,3]
-        list3 = [1,2,4]
-
-        self.assertEqual(liste, list2)
-        self.assertNotEqual(liste, list3)
-        self.assertTrue(liste == list2)
-        self.assertFalse(liste == list3)
-
-    def testListIndexing(self):
-        liste = [1,2,3]
-        self.assertEqual(liste[0],1)
-        #self.assertRaises(IndexError, liste[len(liste)])
-
-    def testTuples(self):
-        meinTupel = 5,
-        self.assertTrue(isinstance(meinTupel,tuple))
-
-    def testTupelCompare(self):
-        myList = [1,2,5]
-        self.assertTrue( myList ==[1,2,5])
-
-        myListB = [1,2,6]
-        self.assertFalse(myListB == myList)
-        myListB[2] = 5
-        self.assertTrue(myListB == myList)
-
-    def testTupleOfEmptyness(self):
-        leerTupel = ()
-        self.assertTrue(isinstance(leerTupel, tuple))
-        leerTupel = ((),)
-        self.assertTrue(isinstance(leerTupel[0], tuple))
-
-        leerTupel = (()) # same as "leertupel = ()"
-        self.assertRaises(IndexError, lambda: leerTupel[0])
-
-    def testCounterVariablesOverwrite(self):
-        x = 10
-        for x in range(20,30):
-            y = x
-        self.assertEqual(x,29)
-        self.assertEqual(y,29)
-
-        k = 0
-        for z in range(3):
-            for z in range(10,20):
-                k = k + 1
-        self.assertEqual(k,30)
-
-    def testRangeObject(self):
-        b = range(1,3)
-        self.assertTrue(isinstance(b,range))
-
-    def testRangeStartEnd(self):
-        got5 = False
-        got10 = False
-        for i in range(5,10):
-            if (i==5):
-                got5 = True
-            if (i == 10):
-                got10 = True
-            
-        self.assertTrue(got5)
-        self.assertFalse(got10)
-
-        ran = 0
-        for i in range(6,6):
-            ran = ran +1
-        self.assertEqual(ran,0)
-
-        zero = False
-        twentythree = False
-        twentyfour = False
-        for i in range(24):
-            if i == 0:
-                zero = True
-            if i == 23:
-                twentythree = True
-            if i == 24:
-                twentyfour = True
-        self.assertTrue(zero)
-        self.assertTrue(twentythree)
-        self.assertFalse(twentyfour)
-
-    def testListCreation(self):
-        a = 5
-        b = [a]
-        self.assertTrue(isinstance(b,list))
-
-    def testListWrapping(self):
-        liste = [1,2,3,4,5]
-
-        self.assertEqual(liste[-1], 5)
-        self.assertEqual(liste[-2], 4)
 
 if __name__ == '__main__':
     unittest.main()
