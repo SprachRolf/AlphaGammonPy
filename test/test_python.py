@@ -1,4 +1,5 @@
 import unittest
+import math
 
 class PythonLanguageTest(unittest.TestCase):
     def testListEquals(self):
@@ -110,4 +111,66 @@ class PythonLanguageTest(unittest.TestCase):
     def testMod(self):
         self.assertTrue( (5 % 2) == 1)
         self.assertTrue( (102 % 2) == 0)
+        
+    def defunct_testAssertAlmostEqualSqrt(self):
+        oneMillionth = 1/1000000
+        fract = 0.000001
+        tinyBit = oneMillionth * oneMillionth
+        million = 1000000
+
+        # This is too big: not "almost equal":
+        # bigNr = 1230712310231
+
+        # This is too small (it is even "equal" when sqrt is squared)
+        #bigNr = 123071231023
+
+        # equal
+        #bigNr = 123071231023.5
+
+        # not equal, but also not "almost equal"
+        # bigNr = 123071231023.45
+
+        bigNr = 123071231023.4546
+
+        # This will make the same rounding error:
+        self.assertEqual(fract, oneMillionth)
+
+        # pythons precision is good enough or some static optimization hits in:
+        #self.assertNotEqual(1, million*million*tinyBit)
+        #self.assertAlmostEqual(1, million*million*tinyBit)
+
+        reconstruct = math.sqrt(bigNr)*math.sqrt(bigNr)
+        self.assertNotEqual(bigNr,reconstruct)
+        self.assertAlmostEqual(bigNr,reconstruct)
+
+        self.assertTrue(False)
+
+    def testAssertAlmostEqual(self):
+        oneSixth = 1/6
+        one36th = (1/6)*(1/6)
+        directResult = (2*(1/6) -(1/6)*(1/6) )*23
+
+        constructedResult = 11*(one36th*23)
+
+        slowConstruct = 0
+        for i in range (11):
+            slowConstruct += (one36th*23)
+
+        # constructResult equals directResult.
+        # probably due to static optimization
+        # self.assertNotEqual(constructedResult, directResult)
+        # self.assertAlmostEqual(constructedResult, directResult)
+
+        # There is a slight error in summing up the parts
+        #print(slowConstruct, directResult)
+
+        self.assertNotEqual(slowConstruct, directResult)
+        self.assertAlmostEqual(slowConstruct, directResult)
+
+    def testDict(self):
+        price = dict()
+        price["banana"] = 4
+
+        self.assertFalse("apple" in price)
+        self.assertTrue("banana" in price)
         

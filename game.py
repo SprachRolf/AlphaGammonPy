@@ -88,13 +88,17 @@ class Game:
                 self.currentPlayer = Game.white
                 self.playerA.yourTurn()
         
+        self.playerA.gamePlayFinished()
+        self.playerB.gamePlayFinished()
+
+
         assert (not (self.whiteWon() and self.redWon()))
         if self.whiteWon():
             return self.white
         else:
             assert self.redWon()
             return self.red
-        
+
 
     def rollOwnDice(self):
         if self.currentPlayer == Game.white:

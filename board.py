@@ -28,7 +28,19 @@ class Board:
 
     # returns true if there is a token of the current player at point
     def hasOwnTokensAt(self, point):
-        return (self.tokens[point]*self.game.currentPlayer >= 1)
+        if (point >= -1) and (point <=24):
+            return (self.tokens[point]*self.game.currentPlayer >= 1)
+        # Beyond the bar and the points there are no tokens
+        # Tokens that are off the board, are not reported.
+        return False
+
+    # returns true if there is a token of the current player at point
+    def hasFoeTokensAt(self, point):
+        if (point >= -1) and (point <=24):
+            return (self.tokens[point]*self.game.currentPlayer <= -1)
+        # Beyond the bar and the points there are no tokens
+        # Tokens that are off the board, are not reported.
+        return False
 
     # Translates point numbers for the white player 
     # into point numbers for the red player.
@@ -37,10 +49,21 @@ class Board:
             return point
         return 23 - point 
 
+    def foePoint(self, point):
+        if (self.game.currentPlayer == game.Game.red):
+            return point
+        return 23 - point 
+
     def ownBarPoint(self):
         if self.game.currentPlayer == game.Game.white:
             return Board.whiteBarPoint
         return Board.redBarPoint
+
+    def foeBarPoint(self):
+        if self.game.currentPlayer == game.Game.red:
+            return Board.whiteBarPoint
+        return Board.redBarPoint
+
 
     def opponentBarPoint(self):
         if self.game.currentPlayer == game.Game.white:
@@ -57,6 +80,13 @@ class Board:
         return ((point >= 0) and (point <=23) and
                 self.tokens[point]*self.game.currentPlayer > -2)
 
+    # returns true if there are no or at most one token of the current player at point
+    def pointIsOpenForFoe(self, point):
+        if self.foeMayBearOff() and (point == self.foePoint(Board.whiteOffPoint)):
+            return True;
+        return ((point >= 0) and (point <=23) and
+                self.tokens[point]*self.game.currentPlayer <= 1)
+
     def hasOwnTokensInHome(self):
         if (self.game.currentPlayer == game.Game.white):
             for i in range(0,6):
@@ -69,7 +99,6 @@ class Board:
             
         return False
     
-
     def mayBearOff(self):
         if (self.hasOwnTokensAt(self.ownBarPoint())):
             return False
@@ -80,6 +109,24 @@ class Board:
         else:
             for i in range(0,18):
                 if (self.hasOwnTokensAt(i)):
+                    return False
+
+        if self.hasOwnTokensInHome():
+            return True
+
+        # There is no own token left on the whole board at all.
+        return False
+
+    def foeMayBearOff(self):
+        if (self.hasFoeTokensAt(self.foeBarPoint())):
+            return False
+        if self.game.currentPlayer == game.Game.red:
+            for i in range(6,24):
+                if (self.hasFoeTokensAt(i)):
+                    return False
+        else:
+            for i in range(0,18):
+                if (self.hasFoeTokensAt(i)):
                     return False
 
         if self.hasOwnTokensInHome():

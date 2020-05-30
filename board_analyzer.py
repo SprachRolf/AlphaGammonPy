@@ -33,9 +33,11 @@ class BoardAnalyzer:
                     moves.append(end)
         return moves
 
-            
-
     def getAllLegalMoveSets(self):
+        moves, boards = self.getAllLegalMoveSetsAndResultingBoards()
+        return moves
+
+    def getAllLegalMoveSetsAndResultingBoards(self):
         moveSet = []
         board = self.game.board
         face1, face2 = self.game.getDiceFaces()
@@ -97,7 +99,7 @@ class BoardAnalyzer:
                                 stepSteps.append(step)
                                 moveSet.append(tuple(stepSteps))
                         if not foundSecondStep:
-                            moveSet.append(steps)
+                            moveSet.append(tuple(steps))
 
                     if (len(steps) > 0):
                         moveSet.append(tuple(steps))
@@ -175,7 +177,7 @@ class BoardAnalyzer:
 
         # Remove illegal moves (moves where pip values are wasted)
         # Remove equivalent moves (where the resulting boards are identical)
-        boards = set()
+        boards = dict()
         finalMoveSet = []
         
         for move in moveSet:
@@ -183,11 +185,11 @@ class BoardAnalyzer:
                 stepBoard = board.copy()
                 stepBoard.moveTokens(move)
                 tupleBoard = tuple(stepBoard.tokens)
-                if not tupleBoard in boards:
-                    boards.add(tupleBoard)
+                if not tupleBoard in boards.values():
+                    boards[move] = tupleBoard
                     finalMoveSet.append(move)
 
-        return tuple(finalMoveSet)
+        return (tuple(finalMoveSet), boards)
 
     # Return a move set, moving the tokens closest to bearing out.
     # A move is lower than another, when tokens on a lower position have been moved.
@@ -204,4 +206,93 @@ class BoardAnalyzer:
             return sets[len(sets)-1]
         return  ()
 
+    # sum up the positions of all tokens
+    def getStepsToGo(self):
+        tokens = self.game.board.tokens
+        stepsLeft = 0
+        if self.game.currentPlayer == self.game.white:
+            for i in range(0,25):
+                if (tokens[i] > 0):
+                    # Just count white tokens
+                    stepsLeft += tokens[i]*(i+1)
+        else:
+            for i in range(-1,24):
+                if (tokens[i] < 0):
+                    stepsLeft += -tokens[i]*(24-i)
 
+        return stepsLeft
+
+    # sum up the positions of all tokens
+    def getFoeStepsToGo(self):
+        tokens = self.game.board.tokens
+        stepsLeft = 0
+        if self.game.currentPlayer == self.game.red:
+            for i in range(0,25):
+                if (tokens[i] > 0):
+                    # Just count white tokens
+                    stepsLeft += tokens[i]*(i+1)
+        else:
+            for i in range(-1,24):
+                if (tokens[i] < 0):
+                    stepsLeft += -tokens[i]*(24-i)
+
+        return stepsLeft
+
+
+    def getThreadSum(self):
+        # !! Should I not add in the risk of tokens on lower points for dice value that can hit a token on a higher point?
+        currentPlayer = self.game.currentPlayer
+        threadSum = 0
+        for i in range(24):
+            toPoint = self.game.board.ownPoint(i)
+
+            if self.game.board.hasOwnTokensAt(i) and self.game.board.pointIsOpenForFoe(i):
+                probabilityOfOneSpecificDiceRollTimesPoint = (1/6)*(1/6)*(24-toPoint)
+                #print("point:", toPoint, "i:", i, "loss:", (24-toPoint))
+                for d1 in range(1,7):
+                    for d2 in range(1,7):
+                        # if this dice combination somehow hits point, add probability (1/6)*(1/6)
+                        #fromPoint = toPoint - d1*currentPlayer
+                        if self.game.board.hasFoeTokensAt(i - d1*currentPlayer):
+                            #print("a", d1, d2)
+                            threadSum += probabilityOfOneSpecificDiceRollTimesPoint
+                        elif (self.game.board.pointIsOpenForFoe((i - d1*currentPlayer)) 
+                              and self.game.board.hasFoeTokensAt(i -(d1+d2)*currentPlayer)):
+                            #print("b", d1, d2)
+                            threadSum += probabilityOfOneSpecificDiceRollTimesPoint
+                        elif self.game.board.hasFoeTokensAt(i - d2*currentPlayer):
+                            #print("c", d1, d2)
+                            threadSum += probabilityOfOneSpecificDiceRollTimesPoint
+                        elif (self.game.board.pointIsOpenForFoe((i -d2*currentPlayer)) 
+                              and self.game.board.hasFoeTokensAt(i -(d2+d1)*currentPlayer)):
+                            #print("d", d1, d2)
+                            threadSum += probabilityOfOneSpecificDiceRollTimesPoint
+                        elif ( (d1 == d2) and self.game.board.pointIsOpenForFoe(i - d1*currentPlayer)
+                                          and self.game.board.pointIsOpenForFoe(i - 2*d1*currentPlayer) 
+                                          and self.game.board.pointIsOpenForFoe(i - 3*d1*currentPlayer) 
+                                          and self.game.board.hasFoeTokensAt(i - 3*d1*currentPlayer)):
+                                            #print("e", d1, d2)
+                                            threadSum += probabilityOfOneSpecificDiceRollTimesPoint
+                        elif ( (d1 == d2) and self.game.board.pointIsOpenForFoe(i - d1*currentPlayer)
+                                          and self.game.board.pointIsOpenForFoe(i - 2*d1*currentPlayer) 
+                                          and self.game.board.pointIsOpenForFoe(i - 3*d1*currentPlayer) 
+                                          and self.game.board.pointIsOpenForFoe(i - 4*d1*currentPlayer)
+                                          and self.game.board.hasFoeTokensAt(i - 4*d1*currentPlayer)):
+                                            #print("f", d1, d2)
+                                            threadSum += probabilityOfOneSpecificDiceRollTimesPoint
+
+        return threadSum
+
+
+    def calculateDisadvantageOfGettingOnBar(self):
+        # +add the annoyance of having a token on the bar after being hit
+        # e.g. blocking status somewhere on the road.
+        pass
+
+    def calculateBenefitOfGettingOnBar(self):
+        # -subtract the benefit of having a token on the bar: ability to hit oponent on a high point.
+        pass
+
+
+
+    

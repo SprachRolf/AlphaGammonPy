@@ -15,8 +15,8 @@ class Tournament:
         #self.spiel.setWhitePlayer(SelectRandomMovePlayer())
         #self.spiel.setRedPlayer(MoveRearTokensPlayer())
 
-        self.spiel.setWhitePlayer(SelectRandomMovePlayer())
-        self.spiel.setRedPlayer(SelectRandomMovePlayer())
+        #self.spiel.setWhitePlayer(SelectRandomMovePlayer())
+        #self.spiel.setRedPlayer(SelectRandomMovePlayer())
         # white starts.
         #white 119, red 81: 60%
         # 105 vs 95: 10%
@@ -36,21 +36,34 @@ class Tournament:
         #
         # 325 vs 324
         # 9865 vs 10135
+        # white: 4012, red: 3887
+        # 4705 vs 4870
         #
         # If Red does not have 7% more wins, there is a bug in implementation
         # 4705 vs 4870, red is 1.7% better. There is a 5% bug somewhere, I guess.
         # Red has 10% more wins --> this is the starting advantage!
+        #
+        #
 
 
+        #self.spiel.setWhitePlayer(SelectRandomMovePlayer())
+        #self.spiel.setRedPlayer(HitPlayer())
+        # RandomPlayer vs Hitplayer
+        # 1 : 19
+        # 0 : 20
+        # 2 : 47 -- Hit player isn't that good!
+        # 4 :196
+        # 5 :195
 
-
+        self.spiel.setRedPlayer(HitPlayer())
+        self.spiel.setWhitePlayer(SelectRandomMovePlayer())
 
 
     def letTheGamesBegin(self):
         aWins = 0
         bWins = 0
         passedRounds = 0
-        rounds = 20000
+        rounds = 100
         print("Ladies and Gentlemen, ", self.spiel.playerA.__class__," is playing against ", self.spiel.playerB.__class__,".",sep="")
         for i in range(rounds):
             self.spiel.setup()
@@ -75,7 +88,7 @@ class Tournament:
             print("A wins.")
         else:
             print("B wins.")
-
+        
 
 tourn = Tournament()
 tourn.letTheGamesBegin()

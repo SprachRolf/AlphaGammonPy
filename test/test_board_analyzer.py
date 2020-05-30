@@ -320,40 +320,179 @@ class BoardAnalyzerTest(unittest.TestCase):
         game = Game()
         analyzer = BoardAnalyzer(game);
 
-        print("Testing all possible moves for random boards.")
+        #print("Testing all possible moves for random boards.")
         nrTestsPassed = 0
         for i in range(number_of_tested_boards):
             self.checkMovesForRandomBoard(game, randomPopulatedBoard, analyzer)
             nrTestsPassed += 1
             if nrTestsPassed == 50:
                 nrTestsPassed = 0
-                print(i+1,"tests have passed.")
+                #print(i+1,"tests have passed.")
 
-        print("Testing all possible moves with at least 1 white and 1 red token on the bar.")
+        #print("Testing all possible moves with at least 1 white and 1 red token on the bar.")
         nrTestsPassed = 0
         for i in range(number_of_tested_boards *20):
             self.checkMovesForRandomBoard(game, randomPopulatedBoardBar, analyzer)
             nrTestsPassed += 1
             if nrTestsPassed == 50:
                 nrTestsPassed = 0
-                print(i+1,"tests have passed.")
+                #print(i+1,"tests have passed.")
 
-        print("Testing all possible moves with 0..15 white tokens on the bar and 0..15 red tokens.")
+        #print("Testing all possible moves with 0..15 white tokens on the bar and 0..15 red tokens.")
         nrTestsPassed = 0
         for i in range(number_of_tested_boards *20):
             self.checkMovesForRandomBoard(game, randomPopulatedBoardManyBar, analyzer)
             nrTestsPassed += 1
             if nrTestsPassed == 50:
                 nrTestsPassed = 0
-                print(i+1,"tests have passed.")
+                #print(i+1,"tests have passed.")
 
-        print("Testing all possible moves when all tokens are in the home area.")
+        #print("Testing all possible moves when all tokens are in the home area.")
         nrTestsPassed = 0
         for i in range(number_of_tested_boards *10):
             self.checkMovesForRandomBoard(game, randomPopulatedBoardBearingOff, analyzer)
             nrTestsPassed += 1
             if nrTestsPassed == 50:
                 nrTestsPassed = 0
-                print(i+1,"tests have passed.")
+                #print(i+1,"tests have passed.")
+
+
+    def testGetStepsToGo(self):
+        game = Game()
+        analyzer = BoardAnalyzer(game);
+        #[-2,0,0,0,0,5, 0,3,0,0,0,-5, 5,0,0,0,-3,0, -5,0,0,0,0,2,  0,0,0,0]
+
+        self.assertEqual(analyzer.getStepsToGo(), 5*6 + 3*8 + 5*13 + 2*24)
+        game.currentPlayer = Game.red
+        self.assertEqual(analyzer.getStepsToGo(), 5*6 + 3*8 + 5*13 + 2*24)
+
+        game.board.tokens = [-2,0,0,0,0,5, 0,3,0,0,0,-5, 5,0,0,0,-3,0, -5,0,0,0,0,1,  0,0,1,0]
+        game.currentPlayer = Game.white
+        self.assertEqual(analyzer.getStepsToGo(), 5*6 + 3*8 + 5*13 + 1*24)
+        game.currentPlayer = Game.red
+        self.assertEqual(analyzer.getStepsToGo(), 5*6 + 3*8 + 5*13 + 2*24)
+
+
+    def testThreadSum(self):
+        game = Game()
+        analyzer = BoardAnalyzer(game);
+
+        game.board.tokens = [-15,1,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,14,0]
+        # -(1/6)*(1/6) because (1,1) will only hit the token once.
+        self.assertAlmostEqual(analyzer.getThreadSum(), (2*(1/6) -(1/6)*(1/6) )*23)
+
+        game.board.tokens = [-1,0,0,1,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,-14,14,0]
+        # hits from (1,1), (1,2), (3,*), (2,1), (*,3)
+        # --> 14*(1/36) on position 21 (oh, I mean position 4, loss 21)
+        self.assertAlmostEqual(analyzer.getThreadSum(), (14*(1/36))*21)
+
+        game.board.tokens = [0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,-1,0,1, 0,-14,14,0]
+        # hits from (1,1), (2,*), (*,2)
+        # --> 12*(1/36) on position 1
+        self.assertAlmostEqual(analyzer.getThreadSum(), (12*(1/36))*1)
+        game.board.tokens = [0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,-2,0,1, 0,-13,14,0]
+        self.assertAlmostEqual(analyzer.getThreadSum(), (12*(1/36))*1)
+
+        game.board.tokens = [-1,0,0,1,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,-1,0,1, 0,-13,13,0]
+        # hits from (1,1), (1,2), (3,*), (2,1), (*,3) and from (1,1), (2,*), (*,2)
+        # --> 14*(1/36) on position 21 + 12*(1/36) on position 1
+        # + interference: 0
+        # The risk at the low position (point 1) for (1,1), (1,2) and (2,1) is neglectible 
+        # because there is a higher risk for these dice values losing token on point 21
+        # Should be: 
+        # self.assertAlmostEqual(analyzer.getThreadSum(), 14*(1/36)*21 + 9*(1/36)*1 )
+        self.assertAlmostEqual(analyzer.getThreadSum(), 14*(1/36)*21 + 12*(1/36)*1 )
+
+        game.board.tokens = [-1,0,0,1,0,0, 0,0,0,0,0,0, 0,0,0,0,-1,0, 1,0,0,0,0,0, 0,-13,13,0]
+        # hits from (1,1), (1,2), (3,*), (2,1), (*,3) and from (1,1), (2,*), (*,2)
+        # --> 14*(1/36) on position 21 + 12*(1/36) on position 6
+        # + interference: (6,6) at position 6
+        self.assertAlmostEqual(analyzer.getThreadSum(), 14*(1/36)*21 + (12+1)*(1/36)*6 )
+
+        game.board.tokens = [-1,0,0,0,0,0, 0,0,1,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,-14,14,0]
+        # hits from (2,2), (4,4), (6,2), (2,6), (3,5), (5,3)
+        # --> (1/36) on position 16
+        self.assertAlmostEqual(analyzer.getThreadSum(), 6*(1/36)*16)
+
+        game.board.tokens = [0,0,-1,0,0,0, 0,0,1,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,-14,14,0]
+        # hits from (2,2), (6,*), (*,6), (1,5), (5,1), (2,4). (4,2), (3,3)
+        # --> (1/36) on position 16
+        self.assertAlmostEqual(analyzer.getThreadSum(), 17*(1/36)*16)
+
+        game.board.tokens = [0,0,0,0,-1,0, 0,0,1,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,-14,14,0]
+        # hits from (1,1) (2,2), (4,*), (*,4), (1,3), (3,1)
+        # --> (1/36) on position 16
+        self.assertAlmostEqual(analyzer.getThreadSum(), 15*(1/36)*16)
+
+        game.board.tokens = [-1,0,0,0,0,1, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,-14,14,0]
+        # hits from (1,4), (4,1), (2,3), (3,2) (5,*), (*,5)
+        # --> 15*(1/36) on position 19
+        self.assertAlmostEqual(analyzer.getThreadSum(), (15*(1/36))*19)
+
+        # test with blocked paths
+        game.board.tokens = [-1,0,2,2,0,1, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,-14,12,0]
+        # hits from (1,4), (4,1), (5,*), (*,5), but not from (2,3) and (3,2)
+        # --> 13*(1/36) on position 19
+        self.assertAlmostEqual(analyzer.getThreadSum(), (13*(1/36))*19)
+
+
+
+        # Test for red player:
+        game.currentPlayer = Game.red
+
+        game.board.tokens = [-1,15,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,-14,0,0]
+        # -(1/6)*(1/6) because (1,1) will only hit the token once.
+        # Hits from (1,*), (*,1): 11*(1/36)
+        self.assertAlmostEqual(analyzer.getThreadSum(), (2*(1/6) -(1/6)*(1/6) )*1)
+
+        game.board.tokens = [-1,0,0,1,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,-14,14,0]
+        # hits from (1,1), (1,2), (3,*), (2,1), (*,3)
+        # --> 14*(1/36) on position 1
+        self.assertAlmostEqual(analyzer.getThreadSum(), (14*(1/36))*1)
+
+        game.board.tokens = [0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,-1,0,1, 0,-14,14,0]
+        # hits from (1,1), (2,*), (*,2)
+        # --> 12*(1/36) on position 22
+        self.assertAlmostEqual(analyzer.getThreadSum(), (12*(1/36))*22)
+        game.board.tokens = [0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,-2,0,1, 0,-13,14,0]
+        self.assertAlmostEqual(analyzer.getThreadSum(), 0)
+
+        game.board.tokens = [-1,0,0,1,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,-1,0,1, 0,-13,13,0]
+        # hits from (1,1), (1,2), (3,*), (2,1), (*,3) and from (1,1), (2,*), (*,2)
+        # --> 14*(1/36) on position 24, loss 1 + 12*(1/36) on position 3, loss 22
+        # + interference: 0
+        self.assertAlmostEqual(analyzer.getThreadSum(), 14*(1/36)*1 + 12*(1/36)*22)
+
+        game.board.tokens = [-1,0,0,1,0,0, 0,0,0,0,0,0, 0,0,0,0,-1,0, 1,0,0,0,0,0, 0,-13,13,0]
+        # hits from (1,1), (1,2), (3,*), (2,1), (*,3) and from (1,1), (2,*), (*,2)
+        # --> 14*(1/36) on position 24, loss 1 + 12*(1/36) on position 8, loss 17
+        # + interference: (6,6) at position 24, loss 1
+        self.assertAlmostEqual(analyzer.getThreadSum(), (14+1)*(1/36)*1 + (12)*(1/36)*17 )
+
+        game.board.tokens = [-1,0,0,0,0,0, 0,0,1,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,-14,14,0]
+        # hits from (2,2), (4,4), (6,2), (2,6), (3,5), (5,3)
+        # --> (1/36) on position 24, loss 1
+        self.assertAlmostEqual(analyzer.getThreadSum(), 6*(1/36)*1)
+
+        game.board.tokens = [0,0,-1,0,0,0, 0,0,1,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,-14,14,0]
+        # hits from (2,2), (6,*), (*,6), (1,5), (5,1), (2,4). (4,2), (3,3)
+        # --> (1/36) on position 22, loss 3
+        self.assertAlmostEqual(analyzer.getThreadSum(), 17*(1/36)*3)
+
+        game.board.tokens = [0,0,0,0,-1,0, 0,0,1,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,-14,14,0]
+        # hits from (1,1) (2,2), (4,*), (*,4), (1,3), (3,1)
+        # --> (1/36) on position 20, loss 5
+        self.assertAlmostEqual(analyzer.getThreadSum(), 15*(1/36)*5)
+
+        game.board.tokens = [-1,0,0,0,0,1, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,-14,14,0]
+        # hits from (1,4), (4,1), (2,3), (3,2) (5,*), (*,5)
+        # --> 15*(1/36) on position 24, loss 1
+        self.assertAlmostEqual(analyzer.getThreadSum(), (15*(1/36))*1)
+
+        # test with blocked paths
+        game.board.tokens = [-1,0,-2,-2,0,1, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,-14,10,0]
+        # hits from (1,4), (4,1), (5,*), (*,5), but not from (2,3) and (3,2)
+        # --> 13*(1/36) on position 24, loss 1
+        self.assertAlmostEqual(analyzer.getThreadSum(), (13*(1/36))*1)
 
 
