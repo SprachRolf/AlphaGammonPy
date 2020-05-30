@@ -65,12 +65,13 @@ class HitPlayer(Player):
         self.previewGame = game.Game()
         self.previewAnalyzer = BoardAnalyzer(self.previewGame)
 
-        
-        self.allBoardsNvalues = pickle.load(open("boards_n_values.p", "rb"))
-        print("unpickled bords n values, length:")
-        print(len(self.allBoardsNvalues))
-        a = next(iter(self.allBoardsNvalues))
-        print("first board: ", a)
+        self.allBoards = []
+        self.allValues = []
+        #self.allBoardsNvalues = pickle.load(open("boards_n_values.p", "rb"))
+        #print("unpickled bords n values, length:")
+        #print(len(self.allBoardsNvalues))
+        #a = next(iter(self.allBoardsNvalues))
+        #print("first board: ", a)
         # for a in self.allBoardsNvalues:
         #     print(a[1])
 
@@ -90,11 +91,13 @@ class HitPlayer(Player):
         for moveSet in moves:
             # Setting board.tokens to a tuple instead of a list 
             # works only because no tokens are moved.
-            self.previewGame.board.tokens = boards[moveSet]
+            tokens = boards[moveSet]
+            self.previewGame.board.tokens = tokens
             foeStepsToGo = self.previewAnalyzer.getFoeStepsToGo()
             threadSum = self.previewAnalyzer.getThreadSum()
             value = foeStepsToGo - threadSum
-            self.allBoardsNvalues.add( (boards[moveSet], value) )
+            self.allBoards.append(tokens)
+            self.allValues.append(value)
 
             self.evaluatedBoardCount += 1
             if value > highestValue:
@@ -108,4 +111,6 @@ class HitPlayer(Player):
     def gamePlayFinished(self):
         print("pickling in gamePlayFinished()")
         print("Hit player has evaluated", self.evaluatedBoardCount)
-        pickle.dump(self.allBoardsNvalues, open("boards_n_values.p", "wb"))
+        file = open("boards_n_values.p", "wb")
+        pickle.dump(self.allBoards, file)
+        pickle.dump(self.allValues, file)

@@ -56,14 +56,15 @@ class Tournament:
         # 5 :195
 
         self.spiel.setRedPlayer(HitPlayer())
-        self.spiel.setWhitePlayer(SelectRandomMovePlayer())
+        self.spiel.setWhitePlayer(HitPlayer())
+        #self.spiel.setWhitePlayer(SelectRandomMovePlayer())
 
 
     def letTheGamesBegin(self):
         aWins = 0
         bWins = 0
         passedRounds = 0
-        rounds = 100
+        rounds = 200
         print("Ladies and Gentlemen, ", self.spiel.playerA.__class__," is playing against ", self.spiel.playerB.__class__,".",sep="")
         for i in range(rounds):
             self.spiel.setup()

@@ -76,29 +76,32 @@ class Game:
         # Let both players roll a dice
         # Let the player begin, who rolled the higher face
 
+        turns = 0
         # For now white starts
         while not self.winnerDetermined():
             #self.currentPlayer = Game.white
             #self.playerA.yourTurn()
             self.currentPlayer = Game.red
             self.playerB.yourTurn()
+            turns += 1
             if not self.winnerDetermined():
                 #self.currentPlayer = Game.red
                 #self.playerB.yourTurn()
                 self.currentPlayer = Game.white
                 self.playerA.yourTurn()
+                turns += 1
         
         self.playerA.gamePlayFinished()
         self.playerB.gamePlayFinished()
 
 
+        #print("both players together played", turns, "turns.")
         assert (not (self.whiteWon() and self.redWon()))
         if self.whiteWon():
             return self.white
         else:
             assert self.redWon()
             return self.red
-
 
     def rollOwnDice(self):
         if self.currentPlayer == Game.white:

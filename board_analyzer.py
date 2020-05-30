@@ -236,6 +236,7 @@ class BoardAnalyzer:
                 if (tokens[i] < 0):
                     stepsLeft += -tokens[i]*(24-i)
 
+        #print("Foe Steps to go:", stepsLeft)
         return stepsLeft
 
 
