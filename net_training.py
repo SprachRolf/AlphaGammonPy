@@ -3,7 +3,7 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.model_selection import train_test_split
 
 
-file = open("boards_n_values_4mb.p", "rb")
+file = open("boards_n_values_880mb.p", "rb")
 X = pickle.load(file)
 y = pickle.load(file)
 
@@ -21,6 +21,8 @@ for i in range(len(y)):
 print(len(X))
 """
 
-regressor = MLPRegressor(solver='adam', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1, max_iter=1000)
+regressor = MLPRegressor(solver='adam', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1, max_iter=1000000)
 regressor.fit(X_train, y_train)
 print(regressor.score(X_test, y_test))
+
+pickle.dump(regressor,open("trained_880mb_net.p", "xb"))

@@ -55,9 +55,38 @@ class Tournament:
         # 4 :196
         # 5 :195
 
-        self.spiel.setRedPlayer(HitPlayer())
-        self.spiel.setWhitePlayer(HitPlayer())
-        #self.spiel.setWhitePlayer(SelectRandomMovePlayer())
+        #self.spiel.setWhitePlayer(NetHitPlayer()) # trained on trained_4mb_net.p
+        #self.spiel.setRedPlayer(SelectRandomMovePlayer())
+        # net vs random
+        #    55 : 44
+        # ca 180:110
+
+        #self.spiel.setWhitePlayer(HitPlayer())
+        #self.spiel.setRedPlayer(HitPlayer())
+
+        #self.spiel.setWhitePlayer(NetHitPlayer()) # trained on trained_35mb_net.p
+        #self.spiel.setRedPlayer(HitPlayer())
+        # net vs hit
+        # 21 : 178
+        #
+
+        #self.spiel.setWhitePlayer(NetHitPlayer()) # trained on trained_880mb_net.p
+        #self.spiel.setRedPlayer(HitPlayer())
+        # net vs hit
+        # (19 : 180)
+        # 46 : 353
+
+        #self.spiel.setWhitePlayer(NetHitPlayer()) # trained on trained_880mb_net.p
+        #self.spiel.setRedPlayer(SelectRandomMovePlayer())
+        # net vs random
+        # (188 : 11)
+        # 468 : 31
+
+        self.spiel.setWhitePlayer(NetHitPlayer()) # trained on trained_35mb_net.p
+        self.spiel.setRedPlayer(SelectRandomMovePlayer())
+        # net vs random
+        # almost same as the 880mb net --> the hidden layers may be too few.
+        # 464 : 35
 
 
     def letTheGamesBegin(self):

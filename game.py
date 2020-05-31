@@ -91,7 +91,9 @@ class Game:
                 self.playerA.yourTurn()
                 turns += 1
         
+        self.currentPlayer = Game.white
         self.playerA.gamePlayFinished()
+        self.currentPlayer = Game.red
         self.playerB.gamePlayFinished()
 
 

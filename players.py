@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from board_analyzer import BoardAnalyzer
+from board_evaluator import BoardEvaluator
 import game
 import sys
 import random
@@ -109,8 +110,47 @@ class HitPlayer(Player):
 
 
     def gamePlayFinished(self):
-        print("pickling in gamePlayFinished()")
-        print("Hit player has evaluated", self.evaluatedBoardCount)
-        file = open("boards_n_values.p", "wb")
-        pickle.dump(self.allBoards, file)
-        pickle.dump(self.allValues, file)
+        # if I am white player:
+
+        #print("pickling in gamePlayFinished(). Player color: ", self.game.currentPlayer)
+        #print("Hit player has evaluated", self.evaluatedBoardCount, "boards.")
+        if self.game.currentPlayer == game.Game.white:
+            file = open("boards_n_values.p", "ab")
+            pickle.dump(self.allBoards, file)
+            pickle.dump(self.allValues, file)
+        #else:
+        #    print("I am the red player, not pickling any evaluations.")    
+
+class NetHitPlayer(Player):
+    def __init__(self):
+        self.evaluator = BoardEvaluator()
+        
+    def yourTurn(self):
+        super().yourTurn()
+        
+        moves, boards = self.analyzer.getAllLegalMoveSetsAndResultingBoards()
+        #print(len(moves), "legal moves.")
+        if len(moves) == 0:
+            # There are no legal moves.
+            # Don't move, it's the opponents turn
+            return
+
+        #print("Game state:", self.game.board.tokens, "(", self.game.whiteDice1.faceUp, "", self.game.whiteDice2.faceUp,")")
+        bestMove = moves[0]
+        highestValue = -sys.maxsize
+        for moveSet in moves:
+            # Setting board.tokens to a tuple instead of a list 
+            # works only because no tokens are moved.
+            tokens = boards[moveSet]
+            value = self.evaluator.getBoardRating(tokens)
+
+            if value > highestValue:
+                highestValue = value
+                #print("better move:", value)
+                bestMove = moveSet
+
+        self.game.board.moveTokens(bestMove)
+        #print("after move:", self.game.board.tokens)
+
+    def gamePlayFinished(self):
+        pass
