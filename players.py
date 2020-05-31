@@ -66,18 +66,33 @@ class HitPlayer(Player):
         self.previewGame = game.Game()
         self.previewAnalyzer = BoardAnalyzer(self.previewGame)
 
-        self.allBoards = []
-        self.allValues = []
-        #self.allBoardsNvalues = pickle.load(open("boards_n_values.p", "rb"))
-        #print("unpickled bords n values, length:")
-        #print(len(self.allBoardsNvalues))
-        #a = next(iter(self.allBoardsNvalues))
-        #print("first board: ", a)
-        # for a in self.allBoardsNvalues:
-        #     print(a[1])
+        #self.allBoards = []
+        #self.allValues = []
+        self.allBoardsLoaded = False
 
     def yourTurn(self):
         super().yourTurn()
+
+
+
+        if not self.allBoardsLoaded:
+            if self.game.currentPlayer == game.Game.white:
+                file = open("boards_n_values_white.p", "rb")
+                self.allBoards = pickle.load(file)
+                self.allValues = pickle.load(file)
+            else:
+                file = open("boards_n_values_red.p", "rb")
+                self.allBoards = pickle.load(file)
+                self.allValues = pickle.load(file)
+
+            print("unpickled bords andn values, length:", len(self.allBoards))
+            a = next(iter(self.allBoards))
+            print("first board: ", a)
+            #for val in self.allValues:
+            #    print(val)
+
+            self.allBoardsLoaded = True
+
         self.previewGame.currentPlayer = self.game.currentPlayer
 
         moves, boards = self.analyzer.getAllLegalMoveSetsAndResultingBoards()
@@ -115,19 +130,22 @@ class HitPlayer(Player):
         #print("pickling in gamePlayFinished(). Player color: ", self.game.currentPlayer)
         #print("Hit player has evaluated", self.evaluatedBoardCount, "boards.")
         if self.game.currentPlayer == game.Game.white:
-            file = open("boards_n_values.p", "ab")
+            file = open("boards_n_values_white.p", "wb")
             pickle.dump(self.allBoards, file)
             pickle.dump(self.allValues, file)
-        #else:
-        #    print("I am the red player, not pickling any evaluations.")    
+        else:
+            file = open("boards_n_values_red.p", "wb")
+            pickle.dump(self.allBoards, file)
+            pickle.dump(self.allValues, file)
+            
 
 class NetHitPlayer(Player):
-    def __init__(self):
-        self.evaluator = BoardEvaluator()
+    def __init__(self, color):
+        self.evaluator = BoardEvaluator(color)
         
     def yourTurn(self):
         super().yourTurn()
-        
+
         moves, boards = self.analyzer.getAllLegalMoveSetsAndResultingBoards()
         #print(len(moves), "legal moves.")
         if len(moves) == 0:

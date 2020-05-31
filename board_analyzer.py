@@ -1,6 +1,6 @@
 #from game import Game
 
-from board import Board
+import board as bo
 
 
 class BoardAnalyzer:
@@ -17,7 +17,7 @@ class BoardAnalyzer:
             fromPoint = board.ownPoint(i)
             whiteToPoint = i-unusedPips[0]
             if whiteToPoint < 0:
-                whiteToPoint = Board.whiteOffPoint
+                whiteToPoint = bo.Board.whiteOffPoint
             toPoint = board.ownPoint(whiteToPoint)
             if (board.hasOwnTokensAt(fromPoint) and board.pointIsOpen(toPoint)):
                 step = (fromPoint,toPoint)
@@ -90,7 +90,7 @@ class BoardAnalyzer:
                             fromPoint = stepBoard.ownPoint(k)
                             whiteToPoint = k-face2
                             if whiteToPoint < 0:
-                                whiteToPoint = Board.whiteOffPoint
+                                whiteToPoint = bo.Board.whiteOffPoint
                             toPoint = stepBoard.ownPoint(whiteToPoint)
                             if (stepBoard.hasOwnTokensAt(fromPoint) and stepBoard.pointIsOpen(toPoint)):
                                 foundSecondStep = True
@@ -110,7 +110,7 @@ class BoardAnalyzer:
                         fromPoint = board.ownPoint(i)
                         whiteToPoint = i-face1
                         if whiteToPoint < 0:
-                            whiteToPoint = Board.whiteOffPoint
+                            whiteToPoint = bo.Board.whiteOffPoint
                         toPoint = board.ownPoint(whiteToPoint)
                         if (board.hasOwnTokensAt(fromPoint) and board.pointIsOpen(toPoint)):
                             stepBoard = board.copy()
@@ -122,7 +122,7 @@ class BoardAnalyzer:
                                 fromPoint = stepBoard.ownPoint(k)
                                 whiteToPoint = k-face2
                                 if whiteToPoint < 0:
-                                    whiteToPoint = Board.whiteOffPoint
+                                    whiteToPoint = bo.Board.whiteOffPoint
                                 toPoint = board.ownPoint(whiteToPoint)
                                 if (stepBoard.hasOwnTokensAt(fromPoint) and stepBoard.pointIsOpen(toPoint)):
                                     foundSecondStep = True

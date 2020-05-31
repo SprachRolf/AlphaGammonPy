@@ -82,24 +82,45 @@ class Tournament:
         # (188 : 11)
         # 468 : 31
 
-        self.spiel.setWhitePlayer(NetHitPlayer()) # trained on trained_35mb_net.p
-        self.spiel.setRedPlayer(SelectRandomMovePlayer())
+        #self.spiel.setWhitePlayer(NetHitPlayer()) # trained on trained_35mb_net.p
+        #self.spiel.setRedPlayer(SelectRandomMovePlayer())
         # net vs random
         # almost same as the 880mb net --> the hidden layers may be too few.
         # 464 : 35
 
+        #self.spiel.setWhitePlayer(NetHitPlayer(game.Game.white)) # trained with 100 runs
+        #self.spiel.setRedPlayer(HitPlayer())
+        # net vs hit: 5:94
+
+        
+        #self.spiel.setWhitePlayer(NetHitPlayer(game.Game.white))
+        #self.spiel.setRedPlayer(NetHitPlayer(game.Game.red))
+        # 40:60
+        # 46:54
+
+        #self.spiel.setWhitePlayer(NetHitPlayer(game.Game.white)) # hidden layers: 10 and 4 neurons
+        #self.spiel.setRedPlayer(HitPlayer())
+        # 20: 80
+
+        self.spiel.setRedPlayer(NetHitPlayer(game.Game.red)) # hidden layers: 10 and 4 neurons
+        self.spiel.setWhitePlayer(HitPlayer())
+        # 75:25
+        # Das rote neuronale Netz ist ein bisschen besser trainiert!
+        #
+        # 82:18
+        # Oder auch nicht.
 
     def letTheGamesBegin(self):
         aWins = 0
         bWins = 0
         passedRounds = 0
-        rounds = 200
+        rounds = 100
         print("Ladies and Gentlemen, ", self.spiel.playerA.__class__," is playing against ", self.spiel.playerB.__class__,".",sep="")
         for i in range(rounds):
             self.spiel.setup()
             winner = self.spiel.runMatch()
             passedRounds = passedRounds +1
-            if passedRounds == 50:
+            if passedRounds == 10:
                 print("Round", i+1,"of",rounds," rounds:")
                 print("Score white: ", aWins,", red: ", bWins, sep="")
                 passedRounds = 0
