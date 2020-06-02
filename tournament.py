@@ -102,13 +102,41 @@ class Tournament:
         #self.spiel.setRedPlayer(HitPlayer())
         # 20: 80
 
-        self.spiel.setRedPlayer(NetHitPlayer(game.Game.red)) # hidden layers: 10 and 4 neurons
-        self.spiel.setWhitePlayer(HitPlayer())
+        #self.spiel.setRedPlayer(NetHitPlayer(game.Game.red)) # hidden layers: 10 and 4 neurons
+        #self.spiel.setWhitePlayer(HitPlayer())
         # 75:25
         # Das rote neuronale Netz ist ein bisschen besser trainiert!
         #
         # 82:18
         # Oder auch nicht.
+
+        #self.spiel.setWhitePlayer(NetHitPlayer(game.Game.white)) # hidden layers: 10 and 4 neurons
+        #self.spiel.setRedPlayer(NetHitPlayer(game.Game.red)) # hidden layers: 10 and 4 neurons
+        # white vs red
+        # 765:1235
+
+        #self.spiel.setWhitePlayer(WinningProbabilityPlayer()) #still with a linear output neuron
+        #self.spiel.setRedPlayer(SelectRandomMovePlayer())
+        # 7  :  3
+        # 81 : 18
+
+        #self.spiel.setWhitePlayer(SelectRandomMovePlayer())
+        #self.spiel.setRedPlayer(WinningProbabilityPlayer()) # playing as red player, still with a linear output neuron
+        # 1  :  9
+        # 1  :  9
+        # 12 : 87
+
+        #self.spiel.setWhitePlayer(SelectRandomMovePlayer())
+        #self.spiel.setRedPlayer(WinningProbabilityPlayer()) # playing as red player, logistic output, 305000 training boards.
+        # 7  : 92
+        self.spiel.setWhitePlayer(WinningProbabilityPlayer()) # playing as red player, logistic output, 305000 training boards.
+        self.spiel.setRedPlayer(SelectRandomMovePlayer())
+        # 90 : 13
+
+        #self.spiel.setWhitePlayer(OnlineLearningPlayer()) # playing as red player, logistic output, 305000 training boards.
+        #self.spiel.setRedPlayer(OnlineLearningPlayer())
+
+
 
     def letTheGamesBegin(self):
         aWins = 0

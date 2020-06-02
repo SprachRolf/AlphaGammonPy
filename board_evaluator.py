@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 #  rate a board with scikit-learn.neural_net
 #
 #
-class BoardEvaluator:
+class HitBoardEvaluator:
     def __init__(self, color):
         if color == game.Game.white:
             self.regressor = pickle.load(open("trained_net_white_500_runs_10_4_hidden_nodes.p", "rb"))
@@ -36,6 +36,13 @@ class BoardEvaluator:
         #print("Training the net.")
         #self.regressor.fit(X_train, y_train)
         #print("Training finished. Score on test set:", self.regressor.score(X_test, y_test))
+
+    def getBoardRating(self, tokens):
+        return self.regressor.predict([tokens])
+
+class WinningColorBoardEvaluator:
+    def __init__(self):
+        self.regressor = pickle.load(open("trained_net_305000_logistic.p", "rb"))
 
 
     def getBoardRating(self, tokens):

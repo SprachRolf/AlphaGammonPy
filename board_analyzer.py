@@ -5,6 +5,23 @@ import board as bo
 
 class BoardAnalyzer:
 
+    # flipBoard() is used to check the generation of allLegalMoves() -- I suspect for red there are some missing.
+    # Change the white tokens to red (and red to white) and move to the respective position
+    # and the red tokens become white and move to the corresponding white point.
+    @staticmethod
+    def flipBoard(liste):
+        assert( (len(liste) % 2) == 0)
+        flippedBoard = liste.copy()
+
+        halfLength = (int) (len(flippedBoard)/2)
+        for i in range(halfLength):
+            a = flippedBoard[i-2]
+            b = flippedBoard[23-(i-2)]
+            flippedBoard[i-2] = -b
+            flippedBoard[23-(i-2)] = -a
+        return flippedBoard
+
+
     def __init__(self, game):
         self.game = game
 

@@ -16,7 +16,7 @@
             "name": "Python: unittests",
             "type": "python",
             "request": "launch",
-            "program": "python3 -m unittest",
+            "program": "/usr/local/bin/python3",
             "console": "integratedTerminal"
         }
     ]

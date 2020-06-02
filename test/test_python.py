@@ -17,6 +17,12 @@ class PythonLanguageTest(unittest.TestCase):
         self.assertEqual(liste[0],1)
         #self.assertRaises(IndexError, liste[len(liste)])
 
+    def testListDivide(self):
+        a = [6,6,6,6]
+        b = [2,2,3,5]
+        print([a[i]/b[i] for i in range(len(a))])
+        self.assertEqual([a[i]/b[i] for i in range(len(a))], [3,3,2,6/5])
+
     def testTuples(self):
         meinTupel = 5,
         self.assertTrue(isinstance(meinTupel,tuple))
@@ -173,4 +179,7 @@ class PythonLanguageTest(unittest.TestCase):
 
         self.assertFalse("apple" in price)
         self.assertTrue("banana" in price)
+
+
+    
         

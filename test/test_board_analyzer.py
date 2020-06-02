@@ -8,17 +8,6 @@ from board_analyzer import BoardAnalyzer
 
 number_of_tested_boards = 100
 
-# flipBoard() is used to check the generation of allLegalMoves() -- I suspect for red there are some missing.
-# Change the white tokens to red (and red to white) and move to the respective position
-# and the red tokens become white and move to the corresponding white point.
-def flipBoard(liste):
-    assert( (len(liste) % 2) == 0)
-    halfLength = (int) (len(liste)/2)
-    for i in range(halfLength):
-        a = liste[i-2]
-        b = liste[23-(i-2)]
-        liste[i-2] = -b
-        liste[23-(i-2)] = -a
 
 # Transform point coordinates from white <-> to red (or back)
 def translateMoveSet(set):
@@ -211,7 +200,7 @@ class BoardAnalyzerTest(unittest.TestCase):
         game.redDice1.faceUp = game.whiteDice1.faceUp
         game.redDice2.faceUp = game.whiteDice2.faceUp
         b = a.copy()
-        flipBoard(b)
+        b = BoardAnalyzer.flipBoard(b)
         game.board.tokens = b
         allBMoveSets = self.translateMoveSetsToWhiteCoordinates(analyzer.getAllLegalMoveSets());
 
@@ -219,6 +208,31 @@ class BoardAnalyzerTest(unittest.TestCase):
         #self.humanReadablyPrintMoves(game, allAMoveSets, allBMoveSets)
         self.assertEqual(len(allAMoveSets), len(allBMoveSets))
         self.assertEqual(allAMoveSets, allBMoveSets)
+
+    def testFlipBoard(self):
+        
+        # initial board
+        a = [-2,0,0,0,0,5, 0,3,0,0,0,-5, 5,0,0,0,-3,0, -5,0,0,0,0,2, 0,0,0,0]
+        b = BoardAnalyzer.flipBoard(a)
+        self.assertEqual(a,b) # the initial board is symmetric
+
+        a = [-15,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,15, 0,0,0,0]
+        b = BoardAnalyzer.flipBoard(a)
+        self.assertEqual(a,b) # the initial board is symmetric
+
+        #a = [,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,, 0,0,0,0]
+
+        a = [1,1,1,1,1,1, 1,1,1,1,1,1, -1,-1,-1,-1,-1,-1, -1,-1,-1,-1,-1,-1, 1,-2,2,-1]
+        b = BoardAnalyzer.flipBoard(a)
+        self.assertEqual(a,b) # the initial board is symmetric
+
+        a = [-14,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,15, 0,0,0,0]
+        b = BoardAnalyzer.flipBoard(a)
+        self.assertNotEqual(a,b) # the initial board is symmetric
+
+        a = [-14,-1,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,15, 0,0,0,0]
+        b = BoardAnalyzer.flipBoard(a)
+        self.assertNotEqual(a,b) # the initial board is symmetric
 
 
     def testGetAllLegalMoveSets_isSameForWhiteAndForRed(self):
@@ -230,11 +244,9 @@ class BoardAnalyzerTest(unittest.TestCase):
         analyzer = BoardAnalyzer(game);
 
         aFlip = a.copy()
-        flipBoard(aFlip)
-        #print(a)
-        #print(aFlip)
+        aFlip = BoardAnalyzer.flipBoard(aFlip)
         self.assertEqual(aFlip, a)
-        flipBoard(aFlip)
+        aFlip = BoardAnalyzer.flipBoard(aFlip)
         self.assertEqual(a, aFlip)
         # The inital board is s symmetric. 
         # Here I don't need the flip() function
@@ -267,9 +279,9 @@ class BoardAnalyzerTest(unittest.TestCase):
 
         a = randomPopulatedBoard()
         b = a.copy()
-        flipBoard(b)
+        b = BoardAnalyzer.flipBoard(b)
         self.assertNotEqual(a,b) # a random board will most likely not be symmetric
-        flipBoard(b)
+        b = BoardAnalyzer.flipBoard(b)
         self.assertEqual(a,b) # flipping back yields the original
 
 # def testGetAllLegalMoveSetsManually(self):

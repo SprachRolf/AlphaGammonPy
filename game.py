@@ -1,9 +1,10 @@
 import random
+import datetime
 from typing import Final
-from players import Player
+
 import board
 from board_analyzer import BoardAnalyzer
-
+from players import Player
 #import tkinter
 
 class Dice:
@@ -28,6 +29,7 @@ class Game:
     red: Final = -1
 
     def __init__(self):
+        random.seed(datetime.datetime.now())
         self.board = board.Board(self)
         self.currentPlayer = Game.white
         self.redDice1 = Dice()
