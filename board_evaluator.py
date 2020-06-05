@@ -1,5 +1,6 @@
-import game
 import pickle
+import datetime
+import game
 from sklearn.neural_network import MLPRegressor
 from sklearn.model_selection import train_test_split
 
@@ -47,3 +48,47 @@ class WinningColorBoardEvaluator:
 
     def getBoardRating(self, tokens):
         return self.regressor.predict([tokens])
+
+
+class OnlineBoardEvaluator:
+    def __init__(self):
+        try:
+            print("Trying to load neural net.")
+            self.regressor = pickle.load(open("trained_net_online.p", "rb"))
+            print("Loading was successful.")
+        except:
+            print("Creating new neural net.")
+            self.regressor = MLPRegressor(solver='adam', alpha=1e-5, hidden_layer_sizes=(10, 4),activation="logistic", random_state=1, max_iter=1000000,)
+
+        self.updates = 0
+        self.saveEveryXth = 1
+
+
+    def getBoardRating(self, tokens):
+        return self.regressor.predict([tokens])
+
+    def learnBatch(self, boards, whiteWins, redWins):
+        X = boards
+        pWhiteWins = [whiteWins[i]/(whiteWins[i] + redWins[i]) for i in range(len(X))]
+        pRedWins =  [redWins[i]/(whiteWins[i] + redWins[i]) for i in range(len(X))]
+        y = [pWhiteWins[i] - pRedWins[i] for i in range(len(X))]
+
+        #X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
+        #self.regressor.fit(X_train, y_train)
+        #print("net score:", self.regressor.score(X_test, y_test))
+
+
+        self.regressor.partial_fit(X,y)
+        self.updates +=1
+        if (self.updates >= self.saveEveryXth):
+            print("Saving net.")
+            dateString = str(datetime.datetime.now())
+            pickle.dump(self.regressor, open("trained_net_online_"+ dateString +".p", "xb"))
+            pickle.dump(self.regressor, open("trained_net_online.p", "wb"))
+            self.updates = 0
+            print("saving a sample batch.")
+            batchFile = open("training_batch_just_one_"+ dateString +".p", "xb")
+            pickle.dump(X, batchFile)
+            pickle.dump(y, batchFile)
+            #close(batchFile)
+

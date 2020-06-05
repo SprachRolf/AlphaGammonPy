@@ -129,12 +129,67 @@ class Tournament:
         #self.spiel.setWhitePlayer(SelectRandomMovePlayer())
         #self.spiel.setRedPlayer(WinningProbabilityPlayer()) # playing as red player, logistic output, 305000 training boards.
         # 7  : 92
-        self.spiel.setWhitePlayer(WinningProbabilityPlayer()) # playing as red player, logistic output, 305000 training boards.
-        self.spiel.setRedPlayer(SelectRandomMovePlayer())
+        #self.spiel.setWhitePlayer(WinningProbabilityPlayer()) 
+        #self.spiel.setRedPlayer(SelectRandomMovePlayer())
         # 90 : 13
 
-        #self.spiel.setWhitePlayer(OnlineLearningPlayer()) # playing as red player, logistic output, 305000 training boards.
+        #self.spiel.setWhitePlayer(OnlineLearningPlayer())
         #self.spiel.setRedPlayer(OnlineLearningPlayer())
+        # 528 : 472
+
+        #self.spiel.setWhitePlayer(OnlineLearningPlayer())
+        #self.spiel.setRedPlayer(NetHitPlayer(game.Game.red))
+        # 6  :   93
+        # 31 :  469
+        # 39 :  461
+        # 41 :  458
+        # 37 :  463
+        # 35 :  465
+        # 37 :  463
+        #385 : 4615
+        #380 : 4620
+
+        #self.spiel.setWhitePlayer(OnlineLearningPlayer())
+        #self.spiel.setRedPlayer(OnlineLearningPlayer())
+        # 243:257
+        # 181:319
+        # The red player plays better. There must be a bug in the training data.
+
+        #self.spiel.setWhitePlayer(OnlineLearningPlayer())  # after 40x10.000 boards training + training on 2.6.2020
+        #self.spiel.setRedPlayer(NetHitPlayer(game.Game.red))
+        #  6:94
+        #  6:94
+
+        #self.spiel.setWhitePlayer(NetHitPlayer(game.Game.white))
+        #self.spiel.setRedPlayer(OnlineLearningPlayer())  # after 40x10.000 boards training + training on 2.6.2020
+        # 89:11
+
+        #self.spiel.setWhitePlayer(NetHitPlayer(game.Game.white))
+        #self.spiel.setRedPlayer(OnlineLearningPlayer())  # starting with 0 training, do partial_fit() for 1000-board batches and later 10.000
+        #   932 :  68   # and learned trained 30x 1000 boards
+        #   832 : 168   # and learned 3x 10.000 boards
+        #   631 : 369   # and learned 4x 10.000 boards
+        #   483 : 517   # and learned 4x 10.000 boards
+        #   466 : 534   # and learned 4x 10.000 boards.
+        #   524 : 475   # from other terminal window. -- unlearned something ??
+        #   565 : 435
+        #   512 : 488
+        #   483 : 518
+        # probably I should learn from another OnlineLearningPlayer, not from the NetHitPlayer that doesn't play superb.
+        # Can't become better, because it learns from NetHitPlayer.
+
+        # training against itself, starting from 0 knowledge.
+        self.spiel.setWhitePlayer(OnlineLearningPlayer())  # starting with 0 training, do partial_fit() 10.000 boards at a time.
+        self.spiel.setRedPlayer(OnlineLearningPlayer())    # starting with 0 training, do partial_fit() 10.000 boards at a time.
+        # expect: always wins about half the games.
+        # hope: after 6.000 gameplays it plays better than NetHitPlayer.
+        # 714 : 286    # they don't know anything.
+        # 772 : 228
+        # (2534:1966)
+        #
+
+
+        # Train OnlineLearningPlayer against HitPlayer. See if it becomes better than NetHitPlayer
 
 
 
@@ -142,20 +197,21 @@ class Tournament:
         aWins = 0
         bWins = 0
         passedRounds = 0
-        rounds = 100
+        rounds = 10000
         print("Ladies and Gentlemen, ", self.spiel.playerA.__class__," is playing against ", self.spiel.playerB.__class__,".",sep="")
         for i in range(rounds):
             self.spiel.setup()
             winner = self.spiel.runMatch()
+            if winner == game.Game.white:
+                aWins = aWins +1
+            else:
+                bWins = bWins +1
+
             passedRounds = passedRounds +1
             if passedRounds == 10:
                 print("Round", i+1,"of",rounds," rounds:")
                 print("Score white: ", aWins,", red: ", bWins, sep="")
                 passedRounds = 0
-            if winner == game.Game.white:
-                aWins = aWins +1
-            else:
-                bWins = bWins +1
             
 
 

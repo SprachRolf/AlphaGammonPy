@@ -194,6 +194,7 @@ class NetHitPlayer(Player):
         #knownWhiteWins = []
         #knownRedWins = []
         
+        """
         file = open("boards_whitewins_redwins.p", "rb")
         knownBoards = pickle.load(file)
         knownWhiteWins = pickle.load(file)
@@ -254,6 +255,7 @@ class NetHitPlayer(Player):
         pickle.dump(knownBoards, file)
         pickle.dump(knownWhiteWins, file)
         pickle.dump(knownRedWins, file)
+        """
 
 class WinningProbabilityPlayer(Player):
     def __init__(self):
@@ -356,3 +358,103 @@ class WinningProbabilityPlayer(Player):
         pickle.dump(knownRedWins, file)
 
         """
+
+
+class OnlineLearningPlayer(Player):
+    def __init__(self):
+        random.seed(datetime.datetime.now())
+
+        self.knownBoards = []
+        self.knownWhiteWins = []
+        self.knownRedWins = []
+
+        self.evaluator = OnlineBoardEvaluator()
+        self.seenBoards = []
+
+    def yourTurn(self):
+        super().yourTurn()
+        self.seenBoards.append(self.game.board.tokens.copy())
+
+        moves, boards = self.analyzer.getAllLegalMoveSetsAndResultingBoards()
+        #print(len(moves), "legal moves.")
+        if len(moves) == 0:
+            # There are no legal moves.
+            # Don't move, it's the opponents turn
+            return
+
+        #print("Game state:", self.game.board.tokens, "(", self.game.whiteDice1.faceUp, "", self.game.whiteDice2.faceUp,")")
+        bestMove = moves[0]
+        highestWinningProbability = -sys.maxsize
+        for moveSet in moves:
+            # Setting board.tokens to a tuple instead of a list 
+            # works only because no tokens are moved.
+            tokens = boards[moveSet]
+            winningProbability = self.evaluator.getBoardRating(tokens)*self.game.currentPlayer
+
+            if winningProbability > highestWinningProbability:
+                highestWinningProbability = winningProbability
+                bestMove = moveSet
+
+        self.game.board.moveTokens(bestMove)
+
+    def gamePlayFinished(self):
+        # Save seenBoards and the result (which color won this time)#
+
+        # The red player only records the game states at the beginning of his move.
+        # These are different than the game states recoreded by the white player.
+        # --> boards from red and white player are both to be saved.
+
+        if self.game.whiteWon():
+            winForWhite = 1
+            winForRed = 0
+        else:
+            winForWhite = 0
+            winForRed = 1
+
+        nrKnownBoards = 0
+        nrKnownFlippedBoards = 0
+        nrNewBoards = 0
+        for tokens in self.seenBoards:
+            flippedTokens = BoardAnalyzer.flipBoard(tokens)
+
+            whichBoard = -1
+            try:
+                whichBoard = self.knownBoards.index(tokens)
+                #print("board", whichBoard,"is known:", knownBoards[whichBoard])
+                nrKnownBoards +=1
+            except ValueError:
+                try:
+                    whichBoard = self.knownBoards.index(flippedTokens)
+                    # If the board is flipped, a white win becomes a red win
+                    store = winForWhite
+                    winForWhite = winForRed
+                    winForRed = store
+                    nrKnownFlippedBoards +=1
+                except ValueError:
+                    pass
+
+            if whichBoard >= 0:
+                whiteWins = self.knownWhiteWins[whichBoard] + winForWhite
+                self.knownWhiteWins[whichBoard] = whiteWins
+
+                redWins   = self.knownRedWins[whichBoard] + winForRed
+                self.knownRedWins[whichBoard] = redWins
+
+                #print("board known:", knownBoards[whichBoard])
+                #print(whiteWins, "white wins and ", redWins, "red wins")
+            else:
+                nrNewBoards +=1
+                self.knownBoards.append(tokens)
+                self.knownWhiteWins.append(winForWhite)
+                self.knownRedWins.append(winForRed)
+
+        #print("Boards new:", nrNewBoards,'known:',nrKnownBoards,"knownFlipped:",nrKnownFlippedBoards)
+        self.seenBoards = []
+
+        # When collected 10.000 freshly evaluated boards: do an online training round
+        if( len(self.knownBoards)> 10000):
+            #print("Training a new net on", len(self.knownBoards), "boards.")
+            self.evaluator.learnBatch(self.knownBoards, self.knownWhiteWins, self.knownRedWins)
+            self.knownBoards = []
+            self.knownWhiteWins = []
+            self.knownRedWins = []
