@@ -3,7 +3,8 @@ import datetime
 from typing import Final
 
 import board
-from board_analyzer import BoardAnalyzer
+#import board_analyzer
+#from board_analyzer import BoardAnalyzer
 from players import Player
 #import tkinter
 
@@ -43,13 +44,13 @@ class Game:
         self.whiteGaveUp = False
 
     def setWhitePlayer(self, player):
-        player.game = self
-        player.analyzer = BoardAnalyzer(self)
+        #player.game = self
+        #player.analyzer = board_analyzer.BoardAnalyzer(self)
         self.playerA = player
 
     def setRedPlayer(self, player):
-        player.game = self
-        player.analyzer = BoardAnalyzer(self)
+        #player.game = self
+        #player.analyzer = board_analyzer.BoardAnalyzer(self)
         self.playerB = player
 
 

@@ -39,7 +39,7 @@ with warnings.catch_warnings():
 print("Training set score: %f" % mlp.score(X_train, y_train))
 print("Test set score: %f" % mlp.score(X_test, y_test))
 
-fig, axes = plt.subplots(5, 5)
+fig, axes = plt.subplots(8, 8)
 # use global min / max to ensure all weights are shown on the same scale
 vmin, vmax = mlp.coefs_[0].min(), mlp.coefs_[0].max()
 for coef, ax in zip(mlp.coefs_[0].T, axes.ravel()):
@@ -49,4 +49,4 @@ for coef, ax in zip(mlp.coefs_[0].T, axes.ravel()):
     ax.set_yticks(())
 
 #plt.show()
-plt.savefig("graph_5_5.png")
+plt.savefig("graph_8_8.png")

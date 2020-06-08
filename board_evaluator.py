@@ -3,7 +3,7 @@ import datetime
 import game
 from sklearn.neural_network import MLPRegressor
 from sklearn.model_selection import train_test_split
-
+import matplotlib.pyplot as plt
 #
 #  rate a board with scikit-learn.neural_net
 #
@@ -51,14 +51,16 @@ class WinningColorBoardEvaluator:
 
 
 class OnlineBoardEvaluator:
-    def __init__(self):
+    def __init__(self, netFilename):
         try:
-            print("Trying to load neural net.")
-            self.regressor = pickle.load(open("trained_net_online.p", "rb"))
+            print("Trying to load neural net:", netFilename +".p")
+            self.regressor = pickle.load(open(netFilename +".p", "rb"))
             print("Loading was successful.")
         except:
             print("Creating new neural net.")
-            self.regressor = MLPRegressor(solver='adam', alpha=1e-5, hidden_layer_sizes=(10, 4),activation="logistic", random_state=1, max_iter=1000000,)
+            self.regressor = MLPRegressor(solver='adam', alpha=1e-5, activation="logistic", random_state=1, max_iter=1000000,)
+
+        self.filenameBase = netFilename
 
         self.updates = 0
         self.saveEveryXth = 1
@@ -83,12 +85,30 @@ class OnlineBoardEvaluator:
         if (self.updates >= self.saveEveryXth):
             print("Saving net.")
             dateString = str(datetime.datetime.now())
-            pickle.dump(self.regressor, open("trained_net_online_"+ dateString +".p", "xb"))
-            pickle.dump(self.regressor, open("trained_net_online.p", "wb"))
+            pickle.dump(self.regressor, open(self.filenameBase +"_"+ dateString +".p", "xb"))
+            pickle.dump(self.regressor, open(self.filenameBase +".p", "wb"))
             self.updates = 0
             print("saving a sample batch.")
-            batchFile = open("training_batch_just_one_"+ dateString +".p", "xb")
+            batchFile = open("training_batch_"+ str(self.saveEveryXth) +"_"+ dateString + "_"+ str(len(boards))  +".p", "xb")
             pickle.dump(X, batchFile)
             pickle.dump(y, batchFile)
-            #close(batchFile)
+            pickle.dump(whiteWins, batchFile)
+            pickle.dump(redWins, batchFile)
+            batchFile.close()
+
+            """
+            fig, axes = plt.subplots(8, 8)
+            # use global min / max to ensure all weights are shown on the same scale
+            vmin, vmax = self.regressor.coefs_[1].min(), self.regressor.coefs_[0].max()
+            for coef, ax in zip(self.regressor.coefs_[1].T, axes.ravel()):
+                ax.matshow(coef.reshape(28,1), cmap=plt.cm.gray, vmin=.5 * vmin,
+                        vmax=.5 * vmax)
+                ax.set_xticks(())
+                ax.set_yticks(())
+
+            #plt.show()
+            plt.savefig("graph_"+ dateString +".png")
+            plt.close()
+            """
+
 

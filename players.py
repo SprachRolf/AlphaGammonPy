@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from board_analyzer import BoardAnalyzer
+#from board_analyzer import BoardAnalyzer
+import board_analyzer as bana
 from board_evaluator import *
 import game
 import sys
@@ -11,14 +12,9 @@ import pickle
 #ABC = abstract base class
 class Player(ABC):
 
-    def __init__(self):
-        #self.game = game
-        # Am I the white player or the red player?
-        #self.whichOne = myColor
-        #self.analyzer = BoardAnalyzer(game)
-
-        #Player.game and Player.analyzer are set in Game.setWhitePlayer() and Game.setRedPlayer()
-        pass
+    def __init__(self, game):
+        self.game = game
+        self.analyzer = bana.BoardAnalyzer(game)
 
     @abstractmethod
     def yourTurn(self):
@@ -48,8 +44,8 @@ class MoveRearTokensPlayer(Player):
         self.game.board.moveTokens(self.analyzer.getHighestLegalMoveSet())
 
 class SelectRandomMovePlayer(Player): 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, game):
+        super().__init__(game)
 
     def yourTurn(self):
         super().yourTurn()
@@ -61,10 +57,12 @@ class SelectRandomMovePlayer(Player):
         self.game.board.moveTokens(move)
         
 class HitPlayer(Player):
-    def __init__(self):
+    def __init__(self,game):
+        super().__init__(game)
+
         self.evaluatedBoardCount = 0
         self.previewGame = game.Game()
-        self.previewAnalyzer = BoardAnalyzer(self.previewGame)
+        self.previewAnalyzer = bana.BoardAnalyzer(self.previewGame)
 
         #self.allBoards = []
         #self.allValues = []
@@ -111,7 +109,7 @@ class HitPlayer(Player):
             threadSum = self.previewAnalyzer.getThreadSum()
             value = foeStepsToGo - threadSum
 
-            flippedTokens = BoardAnalyzer.flipBoard(list(tokens))
+            flippedTokens = bana.BoardAnalyzer.flipBoard(list(tokens))
             try:
                 knownBoardIndex = self.allBoards.index(tokens)
                 print("k ",end="")
@@ -158,9 +156,11 @@ class HitPlayer(Player):
             
 
 class NetHitPlayer(Player):
-    def __init__(self, color):
+    def __init__(self,game):
+        super().__init__(game)
+
         random.seed(datetime.datetime.now())
-        self.evaluator = HitBoardEvaluator(color)
+        self.evaluator = HitBoardEvaluator(game.currentPlayer)
         self.seenBoards = []
 
     def yourTurn(self):
@@ -212,7 +212,7 @@ class NetHitPlayer(Player):
         nrKnownFlippedBoards = 0
         nrNewBoards = 0
         for tokens in self.seenBoards:
-            flippedTokens = BoardAnalyzer.flipBoard(list(tokens))
+            flippedTokens = bana.BoardAnalyzer.flipBoard(list(tokens))
 
             whichBoard = -1
             try:
@@ -313,7 +313,7 @@ class WinningProbabilityPlayer(Player):
         nrKnownFlippedBoards = 0
         nrNewBoards = 0
         for tokens in self.seenBoards:
-            flippedTokens = BoardAnalyzer.flipBoard(list(tokens))
+            flippedTokens = bana.BoardAnalyzer.flipBoard(list(tokens))
 
             whichBoard = -1
             try:
@@ -361,14 +361,22 @@ class WinningProbabilityPlayer(Player):
 
 
 class OnlineLearningPlayer(Player):
-    def __init__(self):
+    def __init__(self, game, netFilename="trained_net"):
+        super().__init__(game)
         random.seed(datetime.datetime.now())
 
         self.knownBoards = []
         self.knownWhiteWins = []
         self.knownRedWins = []
 
-        self.evaluator = OnlineBoardEvaluator()
+        if self.game.currentPlayer == game.white:
+            playerSuffix = "_white"
+        else:
+            playerSuffix = "_red"
+
+        netFilename = netFilename + playerSuffix
+
+        self.evaluator = OnlineBoardEvaluator(netFilename)
         self.seenBoards = []
 
     def yourTurn(self):
@@ -415,24 +423,44 @@ class OnlineLearningPlayer(Player):
         nrKnownFlippedBoards = 0
         nrNewBoards = 0
         for tokens in self.seenBoards:
-            flippedTokens = BoardAnalyzer.flipBoard(tokens)
+            flippedTokens = bana.BoardAnalyzer.flipBoard(tokens)
 
             whichBoard = -1
+            """            
+            try:
+                whichBoard = self.knownBoards.index(flippedTokens)
+                # If the board is flipped, a white win becomes a red win
+                print("f",end="")
+                store = winForWhite
+                winForWhite = winForRed
+                winForRed = store
+                nrKnownFlippedBoards +=1
+            except ValueError:
+                try:
+                    whichBoard = self.knownBoards.index(tokens)
+                    #print("board", whichBoard,"is known:", knownBoards[whichBoard])
+                    print("k",end="")
+                    nrKnownBoards +=1
+                except ValueError:
+                    pass
+            """            
             try:
                 whichBoard = self.knownBoards.index(tokens)
                 #print("board", whichBoard,"is known:", knownBoards[whichBoard])
+                #print("k",end="")
                 nrKnownBoards +=1
             except ValueError:
                 try:
                     whichBoard = self.knownBoards.index(flippedTokens)
                     # If the board is flipped, a white win becomes a red win
+                    #print("f",end="")
                     store = winForWhite
                     winForWhite = winForRed
                     winForRed = store
                     nrKnownFlippedBoards +=1
                 except ValueError:
                     pass
-
+#            """
             if whichBoard >= 0:
                 whiteWins = self.knownWhiteWins[whichBoard] + winForWhite
                 self.knownWhiteWins[whichBoard] = whiteWins
@@ -443,16 +471,17 @@ class OnlineLearningPlayer(Player):
                 #print("board known:", knownBoards[whichBoard])
                 #print(whiteWins, "white wins and ", redWins, "red wins")
             else:
+                #print("n",end="")
                 nrNewBoards +=1
                 self.knownBoards.append(tokens)
                 self.knownWhiteWins.append(winForWhite)
                 self.knownRedWins.append(winForRed)
 
-        #print("Boards new:", nrNewBoards,'known:',nrKnownBoards,"knownFlipped:",nrKnownFlippedBoards)
         self.seenBoards = []
 
         # When collected 10.000 freshly evaluated boards: do an online training round
         if( len(self.knownBoards)> 10000):
+            #print("Last gameplay: Boards new:", nrNewBoards,'known:',nrKnownBoards,"knownFlipped:",nrKnownFlippedBoards)
             #print("Training a new net on", len(self.knownBoards), "boards.")
             self.evaluator.learnBatch(self.knownBoards, self.knownWhiteWins, self.knownRedWins)
             self.knownBoards = []

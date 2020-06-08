@@ -1,8 +1,11 @@
 import warnings
 import pickle
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 from sklearn.neural_network import MLPClassifier
+
+
 
 #mlp = MLPClassifier(hidden_layer_sizes=(50,), max_iter=10, alpha=1e-4,
 #                    solver='sgd', verbose=10, random_state=1,
@@ -76,8 +79,25 @@ filenamesOnline_vs_NetHitPlayer = [
 "trained_net_online_2020-06-04 07:10:05.224282.p"
 ]
 
+OnlineNetFilenames = [
+"trained_net_red_2020-06-05 08:08:58.350913.p",  "trained_net_red_2020-06-05 08:33:26.754625.p",  "trained_net_red_2020-06-05 08:58:50.404211.p",
+"trained_net_red_2020-06-05 08:11:03.014815.p",  "trained_net_red_2020-06-05 08:35:20.789146.p",  "trained_net_red_2020-06-05 09:00:41.733712.p",
+"trained_net_red_2020-06-05 08:13:02.799603.p",  "trained_net_red_2020-06-05 08:37:23.335035.p",  "trained_net_red_2020-06-05 09:02:43.893754.p",
+"trained_net_red_2020-06-05 08:14:55.803295.p",  "trained_net_red_2020-06-05 08:39:13.894068.p",  "trained_net_red_2020-06-05 09:04:29.117824.p",
+"trained_net_red_2020-06-05 08:16:40.054438.p",  "trained_net_red_2020-06-05 08:41:10.474600.p",  "trained_net_red_2020-06-05 09:06:14.495807.p",
+"trained_net_red_2020-06-05 08:18:26.110824.p",  "trained_net_red_2020-06-05 08:43:04.931063.p",  "trained_net_red_2020-06-05 09:08:06.861929.p",
+"trained_net_red_2020-06-05 08:20:16.428791.p",  "trained_net_red_2020-06-05 08:44:57.995400.p",  "trained_net_red_2020-06-05 09:09:59.951924.p",
+"trained_net_red_2020-06-05 08:22:02.361571.p",  "trained_net_red_2020-06-05 08:46:54.072490.p",  "trained_net_red_2020-06-05 09:12:12.011267.p",
+"trained_net_red_2020-06-05 08:23:52.862454.p",  "trained_net_red_2020-06-05 08:48:46.702360.p",  "trained_net_red_2020-06-05 09:14:00.604810.p",
+"trained_net_red_2020-06-05 08:25:44.505309.p",  "trained_net_red_2020-06-05 08:50:55.102564.p",  "trained_net_red_2020-06-06 07:02:21.335289.p",
+"trained_net_red_2020-06-05 08:27:37.153090.p",  "trained_net_red_2020-06-05 08:52:48.944011.p",  
+"trained_net_red_2020-06-05 08:29:29.019739.p",  "trained_net_red_2020-06-05 08:54:46.028841.p",  
+"trained_net_red_2020-06-05 08:31:25.647458.p",  "trained_net_red_2020-06-05 08:56:42.882935.p"
+]
 
-file = open("trained_net_online_2020-06-04 07:10:05.224282.p", "rb")
+
+"""
+file = open("trained_net_online_2020-06-04 07:10:05.224282.p.p", "rb")
 #file = open(filename, "rb")
 mlp = pickle.load(file)
 
@@ -92,11 +112,13 @@ for coef, ax in zip(mlp.coefs_[2].T, axes.ravel()):
 
 #plt.show()
 plt.savefig("graph_layer_3.png")
+plt.close()
+"""
 
 """
 # show input layer weights
 for filename in filenamesOnline_vs_NetHitPlayer:
-    #file = open("trained_net_online_2l020-06-04 06:31:45.624514.p", "rb")
+    #file = open("trained_net_online_2l020-06-04 06:31:45.624514.p.p", "rb")
     file = open(filename, "rb")
     mlp = pickle.load(file)
 
@@ -111,31 +133,36 @@ for filename in filenamesOnline_vs_NetHitPlayer:
 
     #plt.show()
     plt.savefig("graph_"+ filename +".png")
+    plt.close()
 """
 
-# show first hidden layer weights
-for filename in filenamesOnline_vs_NetHitPlayer:
-    #file = open("trained_net_online_2l020-06-04 06:31:45.624514.p", "rb")
+for filename in OnlineNetFilenames:
+    #file = open("trained_net_online_2l020-06-04 06:31:45.624514.p.p", "rb")
     file = open(filename, "rb")
     mlp = pickle.load(file)
 
-    fig, axes = plt.subplots(3, 3)
+    fig, axes = plt.subplots(1, 2)
+    print("type(axes)", type(axes))
+    print("type(coefs_[0])", type(mlp.coefs_[0]))
     # use global min / max to ensure all weights are shown on the same scale
-    vmin, vmax = mlp.coefs_[0].min(), mlp.coefs_[0].max()
+    print(filename, mlp.coefs_[1].shape, mlp.coefs_[1].T.shape)
+    vmin, vmax = mlp.coefs_[1].min(), mlp.coefs_[1].max()
     for coef, ax in zip(mlp.coefs_[1].T, axes.ravel()):
-        ax.matshow(coef.reshape(10,1), cmap=plt.cm.gray, vmin=.5 * vmin,
-                vmax=.5 * vmax)
+
+        ax.matshow(coef.reshape(28,2), cmap=plt.cm.gray, vmin=.5 * vmin, vmax=.5 * vmax)
+        #ax.matshow(coef.reshape(28,2), cmap=plt.cm.gray, vmin=.5 * vmin, vmax=.5 * vmax)
+        #ax.matshow(dentriden1, cmap=plt.cm.gray, vmin=.5 * vmin, vmax=.5 * vmax)
         ax.set_xticks(())
         ax.set_yticks(())
 
     #plt.show()
-    plt.savefig("layer_2/graph_"+ filename +"_layer_2.png")
+    plt.savefig("masking_net_"+ filename +"_layer_1.png")
     plt.close()
 
 """
 # show last hidden layer weights
 for filename in filenamesOnline_vs_NetHitPlayer:
-    #file = open("trained_net_online_2l020-06-04 06:31:45.624514.p", "rb")
+    #file = open("trained_net_online_2l020-06-04 06:31:45.624514.p.p", "rb")
     file = open(filename, "rb")
     mlp = pickle.load(file)
 
@@ -150,6 +177,7 @@ for filename in filenamesOnline_vs_NetHitPlayer:
 
     #plt.show()
     plt.savefig("graph_"+ filename +"_layer_3.png")
+    plt.close()
 """
 
 # --> 2nd hidden layer: only 2 nodes are constant 1. remove layer!

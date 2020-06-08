@@ -179,25 +179,89 @@ class Tournament:
         # Can't become better, because it learns from NetHitPlayer.
 
         # training against itself, starting from 0 knowledge.
-        self.spiel.setWhitePlayer(OnlineLearningPlayer())  # starting with 0 training, do partial_fit() 10.000 boards at a time.
-        self.spiel.setRedPlayer(OnlineLearningPlayer())    # starting with 0 training, do partial_fit() 10.000 boards at a time.
+        #self.spiel.setWhitePlayer(OnlineLearningPlayer())  # starting with 0 training, do partial_fit() 10.000 boards at a time.
+        #self.spiel.setRedPlayer(OnlineLearningPlayer())    # starting with 0 training, do partial_fit() 10.000 boards at a time.
         # expect: always wins about half the games.
         # hope: after 6.000 gameplays it plays better than NetHitPlayer.
         # 714 : 286    # they don't know anything.
         # 772 : 228
         # (2534:1966)
+
+        #self.spiel.setWhitePlayer(OnlineLearningPlayer("trained_net_online_2020-06-04 08:22:12.823709_white.p"))
+        #self.spiel.setRedPlayer(NetHitPlayer(game.Game.red))
+        # 25:75
+        # 27:73
+        # 25:75
+
+        #self.spiel.setWhitePlayer(NetHitPlayer(game.Game.white))
+        #self.spiel.setRedPlayer(OnlineLearningPlayer("trained_net_online_2020-06-04 08:22:09.209022_red.p"))
+        # 68:32
+        # 71:29
+        # 66:34  # red is definitly stronger.
+
+        # Simple net, no hidden layers.
+        #self.spiel.currentPlayer = game.Game.white
+        #self.spiel.setWhitePlayer(OnlineLearningPlayer(self.spiel))
+        #self.spiel.currentPlayer = game.Game.red
+        #self.spiel.setRedPlayer(OnlineLearningPlayer(self.spiel))
         #
+        # After 29 trainings with 10.000 boards: run again:
+        # 175:25
+        # 176:24
+        # 170:30
+
+        #self.spiel.currentPlayer = game.Game.white
+        #self.spiel.setWhitePlayer(OnlineLearningPlayer(self.spiel))
+        #self.spiel.currentPlayer = game.Game.red
+        #self.spiel.setRedPlayer(NetHitPlayer(self.spiel))
+        # Super simple net (no hidden layer, activation "logistic")after 29 trainings with 10.000 boards
+        # 1:39
+        # 25:175
+
+        #self.spiel.currentPlayer = game.Game.white
+        #self.spiel.setWhitePlayer(NetHitPlayer(self.spiel))
+        #self.spiel.currentPlayer = game.Game.red
+        #self.spiel.setRedPlayer(OnlineLearningPlayer(self.spiel))
+        # Super simple net (no hidden layer, activation "logistic")after 29 trainings with 10.000 boards
+        # 184:16
+
+        #self.spiel.currentPlayer = game.Game.white
+        #self.spiel.setWhitePlayer(SelectRandomMovePlayer(self.spiel))
+        #self.spiel.currentPlayer = game.Game.red
+        #self.spiel.setRedPlayer(OnlineLearningPlayer(self.spiel))
+        # 109:91 -- whoa my net doesn't do anything useful!
+
+        #self.spiel.currentPlayer = game.Game.white
+        #self.spiel.setWhitePlayer(OnlineLearningPlayer(self.spiel))
+        #self.spiel.currentPlayer = game.Game.red
+        #self.spiel.setRedPlayer(SelectRandomMovePlayer(self.spiel))
+        # 181:19 -- oh, the white player did learn.
+
+        #self.spiel.currentPlayer = game.Game.white
+        #self.spiel.setWhitePlayer(OnlineLearningPlayer(self.spiel))
+        #self.spiel.currentPlayer = game.Game.red
+        #self.spiel.setRedPlayer(OnlineLearningPlayer(self.spiel))
+
+        #self.spiel.currentPlayer = game.Game.white
+        #self.spiel.setWhitePlayer(NetHitPlayer(self.spiel))
+        #self.spiel.currentPlayer = game.Game.red
+        #self.spiel.setRedPlayer(OnlineLearningPlayer(self.spiel))
+        # training (56,2)relu 69 trainings, each > 10.000 boards
+        # 138:62
 
 
-        # Train OnlineLearningPlayer against HitPlayer. See if it becomes better than NetHitPlayer
-
+        self.spiel.currentPlayer = game.Game.white
+        #self.spiel.setWhitePlayer(OnlineLearningPlayer(self.spiel))
+        self.spiel.setWhitePlayer(OnlineLearningPlayer(self.spiel, "trained_net_2020606_13uhr_training_data"))
+        self.spiel.currentPlayer = game.Game.red
+        self.spiel.setRedPlayer(NetHitPlayer(self.spiel))
 
 
     def letTheGamesBegin(self):
         aWins = 0
         bWins = 0
         passedRounds = 0
-        rounds = 10000
+        rounds = 50
         print("Ladies and Gentlemen, ", self.spiel.playerA.__class__," is playing against ", self.spiel.playerB.__class__,".",sep="")
         for i in range(rounds):
             self.spiel.setup()
